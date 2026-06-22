@@ -8,10 +8,10 @@
 -->
 <extensionset name="WebG Joomla Extensions" description="Plugin Joomla sviluppati da WebG">
     <extension
-        name="Content - Cloudflare Cache Purge"
+        name="Cloudflare Cache Purge"
         element="cfpurge"
         type="plugin"
         folder="content"
-        version="1.1.1"
+        version="1.1.2"
         detailsurl="https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/updates/cfpurge.xml" />
 </extensionset>
