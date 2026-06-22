@@ -23,9 +23,17 @@ https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
 
 ## Plugin pubblicati
 
-| Plugin | element | Tipo | Versione |
-|--------|---------|------|----------|
-| Content - Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.0.1 |
+| Plugin | element | Tipo | Versione | Documentazione |
+|--------|---------|------|----------|----------------|
+| Content - Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.0.1 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
+
+## Documentazione (due pubblici distinti)
+
+- 👤 **[docs/USO.md](./docs/USO.md)** — per chi **gestisce il sito**: installare, ottenere
+  le credenziali Cloudflare, configurare, aggiornare, **disinstallare**. Tutto da interfaccia
+  Joomla, nessuna compilazione.
+- 🤖 **[docs/DEVELOPING.md](./docs/DEVELOPING.md)** — per **sviluppatore o AI**: architettura,
+  modifica del codice, **compilazione dello zip**, processo di rilascio.
 
 ## Aggiungere un plugin nuovo (3 mosse)
 
