@@ -12,6 +12,6 @@
         element="cfpurge"
         type="plugin"
         folder="content"
-        version="1.0.1"
+        version="1.0.2"
         detailsurl="https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/updates/cfpurge.xml" />
 </extensionset>
