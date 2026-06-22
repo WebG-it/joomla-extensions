@@ -25,7 +25,7 @@ https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
 
 | Plugin | element | Tipo | Versione | Documentazione |
 |--------|---------|------|----------|----------------|
-| Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.2 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
+| Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.3 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
 
 ## Documentazione (due pubblici distinti)
 
