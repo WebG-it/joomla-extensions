@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  WebG Joomla Extensions - Collection Update Server
+  UN SOLO URL di update server, condiviso da tutti i plugin WebG.
+  Aggiungere un plugin nuovo = aggiungere UNA riga <extension> qui sotto
+  + il relativo updates/<element>.xml + lo zip in dist/.
+  ATTENZIONE: repo PUBBLICO. Mai inserire dati sensibili (token, password, chiavi).
+-->
+<extensionset name="WebG Joomla Extensions" description="Plugin Joomla sviluppati da WebG">
+    <extension
+        name="Content - Cloudflare Cache Purge"
+        element="cfpurge"
+        type="plugin"
+        folder="content"
+        version="1.0.1"
+        detailsurl="https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/updates/cfpurge.xml" />
+</extensionset>
