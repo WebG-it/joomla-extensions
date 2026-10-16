@@ -55,12 +55,18 @@ contesto `com_content.article`.
   Search, cache, cronologia, log azioni. Spostare = `Table::store()` con nuovo `catid` (asset
   riparentato) + `onFinderAfterSave` per reindicizzare la categoria.
 - Un flag statico `$busy` ignora gli eventi generati dal plugin stesso: niente ricorsioni.
+- Spostare richiede un utente collegato con `core.edit.state` sull'articolo (e `core.create` sulla
+  categoria archivio se l'opzione *Richiedi il permesso di creare* e' accesa); salta gli articoli
+  bloccati da un altro utente; mai per ospiti o CLI. A video solo stringhe di lingua generiche,
+  dettagli solo in `Log::add()`. Categoria archivio inesistente o nel cestino = automazione ferma
+  e avviso agli amministratori.
 
 ## 2. Ambiente di prova (Docker)
 
 Cartella `dev/yooarchive/`: Joomla 6.2.0 ufficiale (zip scaricato e verificato con lo sha256
 della release), PHP 8.4 + Apache (immagine `joomla:6.1-php8.4-apache` usata solo come runtime),
-MariaDB 11.4. Porta locale 8765, solo su 127.0.0.1. Password finte.
+MariaDB 11.4. Porta locale 8765, solo su 127.0.0.1. Le password le scegli tu in `.env`
+(non versionato); nel repo ci sono solo segnaposto in `.env.example`.
 
 **YOOtheme Pro non e' nel repo.** Serve una copia con licenza, fuori dal repo:
 - lo zip ufficiale `yootheme_j_X.Y.Z.zip` dall'account yootheme.com, oppure
@@ -75,14 +81,14 @@ cd dev/yooarchive
 mkdir -p .cache && curl -L -o .cache/joomla-6.2.0.zip \
   https://github.com/joomla/joomla-cms/releases/download/6.2.0/Joomla_6.2.0-Stable-Full_Package.zip
 # sha256 atteso: eaafc68b5990d7b9dd9156656d4c3c3547743d1d7a85682a92e2f9121b58f018
-cp .env.example .env            # e imposta YOOTHEME_SRC
+cp .env.example .env            # imposta YOOTHEME_SRC e le password DEV_*
 docker compose up -d
 docker compose exec web bash /dev-scripts/setup.sh      # Joomla, YOOtheme, lingua it-IT
 docker compose exec web php /dev-scripts/seed.php       # categorie, campi custom, 21 articoli
 docker compose exec web php /dev-scripts/seed_menu.php  # 3 voci "Articoli archiviati"
 ```
 
-Admin: http://localhost:8765/administrator (utente `admin`, password di prova in `scripts/setup.sh`).
+Admin: http://localhost:8765/administrator (utente `admin`, password `DEV_ADMIN_PASSWORD` del tuo `.env`).
 
 Installare lo zip compilato: dal backend (*Sistema > Installa*) oppure da CLI copiandolo prima
 in `tmp/` (da una cartella montata da Windows l'installer CLI fallisce senza messaggio):
@@ -94,7 +100,8 @@ docker compose exec web bash -c 'cp /dist/plg_system_yooarchive-1.0.0.zip tmp/ &
 
 Strumenti di prova (solo sviluppo): `scripts/template.php` (crea/cambia template YOOtheme),
 `scripts/set_layout.php` (mette un layout JSON in un template), `layouts/*.json` (griglia di
-esempio con campi custom, filtri e paginazione), `scripts/api_test.php` (automazione via API),
+esempio con campi custom, filtri e paginazione), `scripts/api_test.php` (automazione via API), `scripts/security_test.php` (permessi
+dell'automazione con un utente Manager di prova),
 `scripts/sql.php` (query sul DB di prova). Log PHP: `administrator/logs/php-error.log`.
 
 Fermare: `docker compose stop`. Rifare da zero: `docker compose down -v`.
@@ -124,7 +131,6 @@ stesso sorgente = stesso sha256 su ogni PC (`.gitattributes` forza LF). Mai `Com
    folder `system`, versione, downloadurl, sha256 stampato dalla build,
    `<targetplatform name="joomla" version="(5|6)\.[0-9]+" />`, `<php_minimum>8.1</php_minimum>`,
    changelogurl `changelogs/yooarchive.xml`.
-5. Alla prima pubblicazione aggiungi la riga `yooarchive` in `collection.xml`.
+5. Aggiorna la versione nella riga `yooarchive` di `collection.xml`.
+6. Tag `yooarchive-X.Y.Z` e GitHub Release con lo zip allegato e le note del CHANGELOG.
 
-Stato al 16-10-2026: 1.0.0 collaudata in locale, **non ancora pubblicata** (niente zip in
-`dist/`, niente riga in `collection.xml`) in attesa della revisione.

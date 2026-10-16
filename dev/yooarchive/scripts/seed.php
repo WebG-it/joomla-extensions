@@ -6,11 +6,11 @@
  * Run from dev/yooarchive:
  *   docker compose exec web php /dev-scripts/seed.php
  *
- * Dev-only tool, never part of the plugin package. Dummy local credentials.
+ * Dev-only tool, never part of the plugin package. Credentials from the DEV_* variables of .env.
  */
 
 const API  = 'http://localhost/api/index.php/v1';
-const AUTH = 'admin:joomla-dev-admin';
+define('AUTH', 'admin:' . getenv('DEV_ADMIN_PASSWORD'));
 
 function api(string $method, string $path, ?array $body = null): array
 {

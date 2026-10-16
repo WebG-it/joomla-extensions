@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 (2026-10-16)
+
+Security review.
+
+- Automation moves only for a logged-in user with *Edit State* on the article; articles checked
+  out by another user are skipped; guests and the command line never move.
+- New option *Require create permission* (on by default): the user must also be allowed to
+  create articles in the archive category.
+- Screen messages are generic and translated; details (ids, database errors) only in the log.
+  In the frontend messages are shown only to users who can manage articles.
+- Archive category deleted or trashed: the automation pauses and administrators are warned.
+- Search text and category titles of *Archive Information* are escaped; the filter form is the
+  only HTML field.
+
 ## 1.0.0 (2026-10-16)
 
 First release.

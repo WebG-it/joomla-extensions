@@ -6,11 +6,11 @@
  * Run from dev/yooarchive:
  *   docker compose exec web php /dev-scripts/seed_menu.php
  *
- * Dev-only tool, never part of the plugin package. Dummy local credentials.
+ * Dev-only tool, never part of the plugin package. Credentials from the DEV_* variables of .env.
  */
 
 const API  = 'http://localhost/api/index.php/v1';
-const AUTH = 'admin:joomla-dev-admin';
+define('AUTH', 'admin:' . getenv('DEV_ADMIN_PASSWORD'));
 
 function api(string $method, string $path, ?array $body = null): array
 {
@@ -37,7 +37,7 @@ function api(string $method, string $path, ?array $body = null): array
     return json_decode((string) $raw, true) ?: [];
 }
 
-$db  = new mysqli('db', 'joomla', 'joomla-dev', 'joomla');
+$db  = new mysqli('db', 'joomla', (string) getenv('DEV_DB_PASSWORD'), 'joomla');
 $cid = (int) $db->query("SELECT extension_id FROM jdev_extensions WHERE element='com_content' AND type='component'")->fetch_row()[0];
 $ven = (int) $db->query("SELECT id FROM jdev_categories WHERE alias='venduti' AND extension='com_content'")->fetch_row()[0];
 $mil = (int) $db->query("SELECT id FROM jdev_categories WHERE alias='venduti-milano' AND extension='com_content'")->fetch_row()[0];

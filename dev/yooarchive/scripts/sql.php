@@ -15,7 +15,7 @@ if ($sql === '') {
     exit(1);
 }
 
-$db = new mysqli('db', 'joomla', 'joomla-dev', 'joomla');
+$db = new mysqli('db', 'joomla', (string) getenv('DEV_DB_PASSWORD'), 'joomla');
 $db->set_charset('utf8mb4');
 $result = $db->query($sql);
 

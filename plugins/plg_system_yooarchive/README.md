@@ -28,7 +28,8 @@ Dynamic content, group **Archive**:
 - **Archived Article**: one article of the current page.
 - **Archive Information**: article count, current page and page count, filtered year and
   month, search text, categories of the menu item, and a ready-made **filter form** (HTML:
-  month, year, title search when enabled in the menu item, items per page).
+  month, year, title search when enabled in the menu item, items per page). The filter form is
+  the only field that returns HTML; search text and category titles are escaped.
 
 The YOOtheme **Pagination** element works on this template (the Joomla archive pagination
 is passed to the builder, filters included).
@@ -43,7 +44,9 @@ Without a template assigned to a page, the archive is rendered by Joomla/YOOthem
 
 In the plugin options, tab *Automation*:
 
-- **Archive category**: the category that holds the archived articles.
+- **Archive category**: the category that holds the archived articles. If it is deleted or
+  trashed the automation pauses and the administrators see a warning.
+- **Require create permission** (on by default): see *Permissions* below.
 - **Move archived articles**: an article archived from the list, the toolbar, the edit form or
   the Web Services API is moved to the archive category.
 - **Archive articles moved into the category**: a published article saved into the archive
@@ -52,12 +55,20 @@ In the plugin options, tab *Automation*:
   archived again even if it was republished on purpose.
 
 Archiving goes through the Joomla article model (`publish()`), so Smart Search, cache, action
-logs and the other plugins see a normal state change. Moves update the article asset and the
-Smart Search index. A guard prevents any recursion; failures are shown in the backend and
-logged in `administrator/logs/plg_system_yooarchive.php`.
+logs and the other plugins see a normal state change, with the usual permission and check-out
+rules. Moves update the article asset and the Smart Search index. A guard prevents any recursion.
 
-Limits: one archive category per site; the user needs the *Edit State* permission for the
-model to archive; not tested with Joomla *Workflows* enabled (the default is off).
+**Permissions.** An article is moved only when a logged-in user archives it and that user has
+*Edit State* on the article; with *Require create permission* on, the user also needs *Create*
+in the archive category. Articles being edited by another user (checked out) are skipped.
+Guests and the command line never move anything.
+
+**Messages.** The backend shows short, generic messages; ids and database errors go only to
+the log `administrator/logs/plg_system_yooarchive.php`. In the frontend (article editing) the
+messages are shown only to users who can manage articles.
+
+Limits: one archive category per site; not tested with Joomla *Workflows* enabled (the
+default is off).
 
 ## Uninstall
 

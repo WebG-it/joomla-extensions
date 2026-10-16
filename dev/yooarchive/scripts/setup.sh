@@ -6,7 +6,8 @@ set -e
 cd /var/www/html
 
 ADMIN_USER=admin
-ADMIN_PASS=joomla-dev-admin
+ADMIN_PASS="${DEV_ADMIN_PASSWORD:?DEV_ADMIN_PASSWORD missing, see .env.example}"
+DB_PASS="${DEV_DB_PASSWORD:?DEV_DB_PASSWORD missing, see .env.example}"
 DB_PREFIX=jdev_
 SQL() { php /dev-scripts/sql.php "$1"; }
 
@@ -18,7 +19,7 @@ if [ ! -f configuration.php ]; then
         --admin-username="$ADMIN_USER" \
         --admin-password="$ADMIN_PASS" \
         --admin-email="admin@example.test" \
-        --db-type=mysqli --db-host=db --db-user=joomla --db-pass=joomla-dev \
+        --db-type=mysqli --db-host=db --db-user=joomla --db-pass="$DB_PASS" \
         --db-name=joomla --db-prefix="$DB_PREFIX" --db-encryption=0 -n
     rm -rf installation
     cp htaccess.txt .htaccess

@@ -7,7 +7,7 @@
  */
 
 const API  = 'http://localhost/api/index.php/v1';
-const AUTH = 'admin:joomla-dev-admin';
+define('AUTH', 'admin:' . getenv('DEV_ADMIN_PASSWORD'));
 
 function api(string $method, string $path, ?array $body = null): array
 {
@@ -34,7 +34,7 @@ function api(string $method, string $path, ?array $body = null): array
     return json_decode((string) $raw, true) ?: [];
 }
 
-$db  = new mysqli('db', 'joomla', 'joomla-dev', 'joomla');
+$db  = new mysqli('db', 'joomla', (string) getenv('DEV_DB_PASSWORD'), 'joomla');
 $row = static fn (int $id) => $db->query("SELECT catid, state FROM jdev_content WHERE id=$id")->fetch_assoc();
 $cat = static fn (string $alias) => (int) $db->query("SELECT id FROM jdev_categories WHERE alias='$alias' AND extension='com_content'")->fetch_row()[0];
 

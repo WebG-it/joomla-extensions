@@ -10,6 +10,7 @@
 
 namespace WebG\Plugin\System\Yooarchive\Extension;
 
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
@@ -38,6 +39,14 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
      * @since  1.0.0
      */
     private ?Automation $automation = null;
+
+    /**
+     * Cached result of the archive category check (null = not checked yet).
+     *
+     * @var    bool|null
+     * @since  1.1.0
+     */
+    private ?bool $validTarget = null;
 
     /**
      * @return  array<string, string>
@@ -69,6 +78,15 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
     public function onAfterInitialise(): void
     {
         $this->loadLanguage();
+
+        // Tell the administrators when the automation is paused because its category is gone.
+        if ($this->params->get('automation') && $this->getApplication()->isClient('administrator') && !$this->hasValidTarget()) {
+            $user = $this->getApplication()->getIdentity();
+
+            if ($user && $user->authorise('core.manage', 'com_plugins')) {
+                $this->getApplication()->enqueueMessage(Text::_('PLG_SYSTEM_YOOARCHIVE_MSG_TARGET_INVALID'), 'warning');
+            }
+        }
 
         if (!class_exists(\YOOtheme\Application::class, false)) {
             return;
@@ -138,6 +156,19 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
     }
 
     /**
+     * Whether the archive category exists, belongs to com_content and is not trashed.
+     * Checked once per request.
+     *
+     * @return  bool
+     *
+     * @since   1.1.0
+     */
+    private function hasValidTarget(): bool
+    {
+        return $this->validTarget ??= Automation::isValidTarget((int) $this->params->get('target_catid', 0));
+    }
+
+    /**
      * Returns the automation service, or null when the automation is switched off.
      *
      * @return  Automation|null
@@ -146,7 +177,7 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
      */
     private function getAutomation(): ?Automation
     {
-        if (!$this->params->get('automation') || (int) $this->params->get('target_catid') <= 0) {
+        if (!$this->params->get('automation') || !$this->hasValidTarget()) {
             return null;
         }
 

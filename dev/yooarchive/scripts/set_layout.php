@@ -15,7 +15,7 @@ if (!$id || !$file) {
     exit(1);
 }
 
-$db   = new mysqli('db', 'joomla', 'joomla-dev', 'joomla');
+$db   = new mysqli('db', 'joomla', (string) getenv('DEV_DB_PASSWORD'), 'joomla');
 $row  = $db->query("SELECT extension_id, custom_data FROM jdev_extensions WHERE type='plugin' AND folder='system' AND element='yootheme'")->fetch_assoc();
 $data = json_decode($row['custom_data'] ?: '{}', true);
 

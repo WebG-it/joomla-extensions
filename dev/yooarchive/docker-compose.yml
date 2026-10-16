@@ -1,5 +1,6 @@
 # Local test environment for plg_system_yooarchive: Joomla 6.2 + PHP 8.4 + MariaDB 11.4.
-# Only for local development on localhost. All passwords here are dummy values.
+# Only for local development on localhost. Passwords come from .env (not versioned,
+# copy .env.example and choose your own values).
 # See dev/yooarchive/README.md for setup, including where to get YOOtheme Pro
 # (proprietary, never committed to this repository).
 name: yooarchive-dev
@@ -8,10 +9,10 @@ services:
   db:
     image: mariadb:11.4
     environment:
-      MARIADB_ROOT_PASSWORD: joomla-dev
+      MARIADB_ROOT_PASSWORD: ${DEV_DB_ROOT_PASSWORD:?set DEV_DB_ROOT_PASSWORD in .env}
       MARIADB_DATABASE: joomla
       MARIADB_USER: joomla
-      MARIADB_PASSWORD: joomla-dev
+      MARIADB_PASSWORD: ${DEV_DB_PASSWORD:?set DEV_DB_PASSWORD in .env}
     volumes:
       - db:/var/lib/mysql
     healthcheck:
@@ -30,6 +31,8 @@ services:
     entrypoint: ["bash", "/dev-scripts/entrypoint.sh"]
     environment:
       DEV_SITE_URL: http://localhost:${DEV_PORT:-8765}
+      DEV_DB_PASSWORD: ${DEV_DB_PASSWORD:?set DEV_DB_PASSWORD in .env}
+      DEV_ADMIN_PASSWORD: ${DEV_ADMIN_PASSWORD:?set DEV_ADMIN_PASSWORD in .env}
     ports:
       - "127.0.0.1:${DEV_PORT:-8765}:80"
     volumes:

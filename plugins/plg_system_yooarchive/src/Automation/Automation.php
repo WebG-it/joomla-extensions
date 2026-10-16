@@ -36,6 +36,8 @@ use Joomla\Registry\Registry;
  *   (Smart Search, cache, versions) sees a normal state change.
  * - With "force archived" on, a published article stored in the target category is
  *   always archived again, even if it was already there.
+ * - Moves need a logged-in user with Edit State on the article (and, by default,
+ *   Create on the archive category); articles checked out by another user are skipped.
  *
  * Archiving is queued during the table store and executed once the article has been
  * saved (onContentAfterSave, also dispatched by Joomla 6 for each batch-moved article,
@@ -259,7 +261,7 @@ final class Automation
             $requested = $pks;
 
             if (!$model->publish($pks, self::STATE_ARCHIVED)) {
-                $this->warn(Text::sprintf('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', implode(', ', $requested), (string) $model->getError()));
+                $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $requested) . ': ' . $model->getError());
 
                 return;
             }
@@ -269,7 +271,7 @@ final class Automation
                 Log::add('Archived articles ' . implode(',', $pks), Log::INFO, 'yooarchive');
             }
         } catch (\Throwable $e) {
-            $this->warn(Text::sprintf('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', implode(', ', $pks), $e->getMessage()));
+            $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
         } finally {
             self::$busy = false;
         }
@@ -292,15 +294,39 @@ final class Automation
             return;
         }
 
+        $target = $this->getTarget();
+        $user   = $this->app->getIdentity();
+
+        // Only a logged-in user can trigger a move: never guests, never the command line.
+        if ($this->app->isClient('cli') || !$user || $user->guest || !$user->id) {
+            Log::add('Move skipped for articles ' . implode(',', $pks) . ': no logged-in user', Log::WARNING, 'yooarchive');
+
+            return;
+        }
+
+        if ($this->params->get('require_create', 1) && !$user->authorise('core.create', 'com_content.category.' . $target)) {
+            $this->warn(
+                'PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_SKIPPED',
+                'Move skipped for articles ' . implode(',', $pks) . ': user ' . $user->id . ' cannot create in category ' . $target
+            );
+
+            return;
+        }
+
         self::$busy = true;
         $moved      = [];
-        $target     = $this->getTarget();
+        $skipped    = [];
 
         try {
             /** @var ContentTable $table */
             $table = $this->app->bootComponent('com_content')->getMVCFactory()->createTable('Article', 'Administrator');
 
             foreach ($pks as $pk) {
+                if (!$user->authorise('core.edit.state', 'com_content.article.' . $pk)) {
+                    $skipped[$pk] = 'no core.edit.state';
+                    continue;
+                }
+
                 $table->reset();
                 $table->id = null;
 
@@ -308,10 +334,16 @@ final class Automation
                     continue;
                 }
 
+                // Do not touch an article that another user is editing.
+                if (!empty($table->checked_out) && (int) $table->checked_out !== (int) $user->id) {
+                    $skipped[$pk] = 'checked out by user ' . (int) $table->checked_out;
+                    continue;
+                }
+
                 $table->catid = $target;
 
                 if (!$table->check() || !$table->store()) {
-                    $this->warn(Text::sprintf('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', $pk, $table->getError()));
+                    $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', 'Move failed for article ' . $pk . ': ' . $table->getError());
                     continue;
                 }
 
@@ -324,8 +356,18 @@ final class Automation
                 $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_MOVED_N', \count($moved)));
                 Log::add('Moved articles ' . implode(',', $moved) . ' to category ' . $target, Log::INFO, 'yooarchive');
             }
+
+            if ($skipped) {
+                $detail = [];
+
+                foreach ($skipped as $pk => $reason) {
+                    $detail[] = $pk . ' (' . $reason . ')';
+                }
+
+                $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_SKIPPED', 'Move skipped for articles ' . implode(', ', $detail));
+            }
         } catch (\Throwable $e) {
-            $this->warn(Text::sprintf('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', implode(', ', $pks), $e->getMessage()));
+            $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', 'Move failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
         } finally {
             self::$busy = false;
         }
@@ -388,6 +430,35 @@ final class Automation
     }
 
     /**
+     * Checks that a category can be used as archive category: it exists, belongs to
+     * com_content and is not in the trash.
+     *
+     * @param   int  $catid  The category id.
+     *
+     * @return  bool
+     *
+     * @since   1.1.0
+     */
+    public static function isValidTarget(int $catid): bool
+    {
+        if ($catid <= 0) {
+            return false;
+        }
+
+        $db    = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->createQuery()
+            ->select($db->quoteName('published'))
+            ->from($db->quoteName('#__categories'))
+            ->where($db->quoteName('id') . ' = :id')
+            ->where($db->quoteName('extension') . ' = ' . $db->quote('com_content'))
+            ->bind(':id', $catid, ParameterType::INTEGER);
+
+        $published = $db->setQuery($query)->loadResult();
+
+        return $published !== null && (int) $published !== -2;
+    }
+
+    /**
      * Cleans the com_content cache after a move.
      *
      * @return  void
@@ -422,20 +493,27 @@ final class Automation
     }
 
     /**
-     * Logs a problem and shows it in the administrator.
+     * Logs a problem with all its details and shows only a generic, translated
+     * message: in the administrator to everyone, in the frontend only to users who
+     * can manage articles. Error details (ids, database messages) never reach the screen.
      *
-     * @param   string  $message  The message.
+     * @param   string  $languageKey  Language key of the generic message.
+     * @param   string  $detail       Technical detail, written only to the log.
      *
      * @return  void
      *
-     * @since   1.0.0
+     * @since   1.1.0
      */
-    private function warn(string $message): void
+    private function warn(string $languageKey, string $detail): void
     {
-        Log::add($message, Log::WARNING, 'yooarchive');
+        Log::add($detail, Log::WARNING, 'yooarchive');
 
-        if ($this->app->isClient('administrator') || $this->app->isClient('site')) {
-            $this->app->enqueueMessage($message, 'warning');
+        $user = $this->app->getIdentity();
+        $show = $this->app->isClient('administrator')
+            || ($this->app->isClient('site') && $user && $user->authorise('core.manage', 'com_content'));
+
+        if ($show) {
+            $this->app->enqueueMessage(Text::_($languageKey), 'warning');
         }
     }
 }

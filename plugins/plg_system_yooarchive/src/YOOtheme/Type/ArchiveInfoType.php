@@ -109,7 +109,7 @@ class ArchiveInfoType
 
         foreach ((array) ($info['catids'] ?? []) as $catid) {
             if ($category = Categories::getInstance('content')->get((int) $catid)) {
-                $titles[] = $category->title;
+                $titles[] = htmlspecialchars((string) $category->title, ENT_QUOTES, 'UTF-8');
             }
         }
 

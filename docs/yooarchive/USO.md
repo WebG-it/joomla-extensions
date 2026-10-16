@@ -55,15 +55,24 @@ Senza un template assegnato la pagina archivio resta quella di sempre.
 | Opzione | Cosa fa |
 |---|---|
 | Attiva automazione | Accende tutto il resto. |
-| Categoria archivio | Dove finiscono gli articoli archiviati. Senza categoria non succede nulla. |
+| Categoria archivio | Dove finiscono gli articoli archiviati. Senza categoria, o se la categoria viene cancellata o messa nel cestino, l'automazione si ferma e gli amministratori vedono un avviso. |
+| Richiedi il permesso di creare | Acceso di serie: sposta solo se chi archivia può anche creare articoli nella categoria archivio. |
 | Sposta gli articoli archiviati | Archivia (da elenco, barra, modifica o API) = sposta nella categoria. |
 | Archivia gli articoli spostati nella categoria | Un articolo pubblicato salvato o spostato (anche con *Elaborazione in serie*) nella categoria viene archiviato. |
 | Forza archiviato | Spento: puoi ripubblicare apposta un articolo che sta già nella categoria. Acceso: viene riarchiviato sempre. |
 
 Dopo ogni azione compare un messaggio blu che dice cosa ha fatto il plugin. Ricerca
-intelligente, cache e cronologia si aggiornano come con un clic a mano. Errori (per esempio
-un alias doppio nella categoria di arrivo) compaiono in giallo e finiscono nel log
-`administrator/logs/plg_system_yooarchive.php`.
+intelligente, cache e cronologia si aggiornano come con un clic a mano.
+
+Permessi: l'articolo viene spostato solo se chi lo archivia è un utente collegato con il
+permesso *Modifica stato* sull'articolo (e, con l'opzione accesa, *Crea* nella categoria
+archivio). Gli articoli aperti in modifica da un altro utente non vengono toccati. Ospiti e
+riga di comando non spostano nulla.
+
+Se qualcosa non va (permesso mancante, alias doppio nella categoria di arrivo) compare un
+messaggio giallo generico; i dettagli (numeri degli articoli, errore del database) finiscono
+solo nel log `administrator/logs/plg_system_yooarchive.php`. Nel sito pubblico (modifica
+articoli dal frontend) i messaggi li vede solo chi può gestire gli articoli.
 
 ## 4. Aggiornare
 

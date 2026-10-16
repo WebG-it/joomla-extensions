@@ -1,0 +1,75 @@
+# Archive Layouts for YOOtheme: developer guide
+
+English summary of [DEVELOPING.md](./DEVELOPING.md) (Italian, more detailed).
+
+> Public repository: never commit tokens, passwords, keys, server hosts or customer data, and
+> never YOOtheme Pro files (proprietary). The test environment mounts YOOtheme from outside.
+
+## Architecture
+
+```
+plugins/plg_system_yooarchive/
+  yooarchive.xml                manifest (namespace WebG\Plugin\System\Yooarchive)
+  script.php                    PHP >= 8.1, Joomla >= 5.0, enables the plugin on first install
+  services/provider.php         Joomla 5/6 service provider
+  bootstrap.php                 YOOtheme module loaded with Application::load()
+  src/Extension/Yooarchive.php  plugin (SubscriberInterface)
+  src/Automation/Automation.php archive/category automation
+  src/YOOtheme/...              builder integration
+  language/{en-GB,it-IT}/
+```
+
+| YOOtheme event | Class | Role |
+|---|---|---|
+| `BuilderConfig` (priority 10) | `LoadBuilderConfig` | adds the `com_content.archive` template type and its assignment fields |
+| `builder.template` | `MatchTemplate` | on the archive view returns type, assignment query and params (`items`, `pagination`, `archive`) |
+| `builder.template.load` | `LoadTemplateUrl` | customizer preview URL: the archive menu item matching the template categories |
+| `source.init` | `SourceListener` | queries `yooarchiveArticles` (list of `Article`), `yooarchiveArticle`, `yooarchive` (`YooarchiveInfo`) |
+
+Joomla prepares archive items with the `com_content.archive` context, which com_fields does not
+map to `article`, so `jcfields` is empty; `ArchiveQueryType::prepareItems()` drops the empty list
+and YOOtheme reloads the fields with `com_content.article`.
+
+Automation: `onTableBeforeStore` remembers category and state; `onTableAfterStore` queues an
+archive or a move; `onContentChangeState` handles list/toolbar/API state changes; the queue runs
+on `onContentAfterSave` / `onContentCleanCache`. Archive = `ArticleModel::publish($pks, 2)`;
+move = `Table::store()` with the new `catid` plus `onFinderAfterSave`. Moves need a logged-in user
+with `core.edit.state` on the article (and `core.create` on the target category when *Require
+create permission* is on), skip articles checked out by others, never run for guests or CLI.
+Screen messages are generic language strings; details go to `Log::add()` only. A static `$busy`
+flag prevents recursion. An invalid (missing or trashed) archive category pauses the automation.
+
+## Test environment (Docker)
+
+`dev/yooarchive/`: official Joomla 6.2.0 zip (sha256 verified), PHP 8.4 + Apache, MariaDB 11.4,
+port 8765 on 127.0.0.1. Passwords and the YOOtheme Pro folder are set in `.env` (not versioned,
+copy `.env.example`).
+
+```bash
+cd dev/yooarchive
+mkdir -p .cache && curl -L -o .cache/joomla-6.2.0.zip \
+  https://github.com/joomla/joomla-cms/releases/download/6.2.0/Joomla_6.2.0-Stable-Full_Package.zip
+cp .env.example .env        # set YOOTHEME_SRC and the DEV_* passwords
+docker compose up -d
+docker compose exec web bash /dev-scripts/setup.sh
+docker compose exec web php /dev-scripts/seed.php
+docker compose exec web php /dev-scripts/seed_menu.php
+```
+
+Test helpers: `scripts/template.php`, `scripts/set_layout.php`, `layouts/*.json`,
+`scripts/api_test.php`, `scripts/security_test.php`, `scripts/sql.php`.
+
+JED Checker (https://github.com/joomla-extensions/jedchecker) needs the *Behaviour - Backward
+Compatibility 6* plugin on Joomla 6; switch it on only for the check.
+
+## Build and release
+
+```bash
+python build/build_plugin.py plugins/plg_system_yooarchive   # reproducible zip in build/out/
+```
+
+1. Bump `<version>`, update `CHANGELOG.md` and `changelogs/yooarchive.xml`.
+2. Build, run JED Checker (no errors, no warnings) and the Docker tests.
+3. Copy the zip to `dist/`, update `updates/yooarchive.xml` (version, downloadurl, sha256,
+   `targetplatform (5|6)`, `php_minimum 8.1`) and the version in `collection.xml`.
+4. Tag `yooarchive-X.Y.Z` and create the GitHub release with the zip attached.

@@ -92,7 +92,7 @@ class MatchTemplate
                     'total'      => (int) $pagination->total,
                     'month'      => (int) $state->get('filter.month'),
                     'year'       => (int) $state->get('filter.year'),
-                    'search'     => (string) $state->get('list.filter'),
+                    'search'     => htmlspecialchars((string) $state->get('list.filter'), ENT_QUOTES, 'UTF-8'),
                     'catids'     => $catids,
                     'page'       => (int) $pagination->pagesCurrent,
                     'pages'      => (int) $pagination->pagesTotal,
