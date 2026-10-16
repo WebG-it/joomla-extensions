@@ -39,6 +39,16 @@ create permission* is on), skip articles checked out by others, never run for gu
 Screen messages are generic language strings; details go to `Log::add()` only. A static `$busy`
 flag prevents recursion. An invalid (missing or trashed) archive category pauses the automation.
 
+Redirects (option *301 redirect from the old address*, since 1.2.0): the public URL is built with
+`Route::link('site', RouteHelper::getArticleRoute(id, catid, language))` before and after the
+category change (in `move()` for the plugin's own moves, in `onTableBeforeStore` for a published
+article a user brings into the category, with the stored category and alias). When the URLs
+differ and are SEF, a row is stored in `#__redirect_links` through the com_redirect `Link` table
+(301; an existing row with the same old URL is updated; a row starting from the new URL, now a
+live page again, is unpublished). The core *System - Redirect* plugin serves it on 404 pages;
+administrators are warned when it is off. 4SEO does not create redirects by itself when an
+article URL changes (checked with 4SEO 7.2.0).
+
 ## Test environment (Docker)
 
 `dev/yooarchive/`: official Joomla 6.2.0 zip (sha256 verified), PHP 8.4 + Apache, MariaDB 11.4,
@@ -81,8 +91,53 @@ docker compose exec web bash -c "cp /dist/$ZIP tmp/ && chown www-data tmp/$ZIP &
 Test helpers: `scripts/template.php`, `scripts/set_layout.php`, `layouts/*.json`,
 `scripts/api_test.php`, `scripts/security_test.php`, `scripts/sql.php`.
 
+### Compatibility tests (YOOtheme Pro, Essentials, 4SEO)
+
+They need licensed copies of the third-party extensions, **outside the repository** (like
+YOOtheme), in a folder with one subfolder per extension holding the installed files of a site
+with the site paths (`plugins/system/yooessentials`, `media/yooessentials`,
+`administrator/components/com_forseo`, `plugins/system/forseo`, ...). Never copy configuration
+files or keys: Essentials creates its own `secret.php`.
+
+Two sites side by side, Joomla 6.2 and 5.4, each with an env file (not versioned, for example in
+`.cache/`) that adds `VENDOR_DIR` (the folder above), `JOOMLA_ZIP` (official zip checked against
+the release sha256, for example `./.cache/joomla-5.4.10.zip`) and its own `DEV_PORT`:
+
+```bash
+dc() { MSYS_NO_PATHCONV=1 docker compose -p yooarchive-j6 --env-file .cache/compat-j6.env \
+       -f docker-compose.yml -f docker-compose.compat.yml "$@"; }
+dc up -d && dc exec web bash /dev-scripts/setup.sh
+dc exec web php /dev-scripts/seed.php && dc exec web php /dev-scripts/seed_menu.php
+dc exec web bash /dev-scripts/loopback_port.sh        # the site can reach its own URL (4SEO analysis)
+dc exec web bash /dev-scripts/install_vendor.sh forseo-7.2.0.2824      # "Discover" install
+dc exec web bash /dev-scripts/install_vendor.sh yooessentials-3.0.15
+dc exec web php /dev-scripts/essentials_csv.php       # Essentials CSV source for the tests
+```
+
+Plugins installed with *Discover* start disabled: enable them (`sql.php`) and complete the 4SEO
+setup wizard in the backend. On a port other than 80 the 4SEO crawler redirects to itself (it
+compares the canonical root without the port): for the tests set the 4SEO canonical root to
+`http://localhost/` and the sitemap delay to the minimum.
+
+Test layouts in `layouts/compat/` (built by `make_layouts.py`): each page type (archive,
+article, category, featured, search) has a `COMPAT-<type>` marker, YOOtheme and Essentials
+elements fed by the page source and a grid on the Essentials CSV source. Assign them with
+`scripts/template.php`.
+
+More helpers: `scripts/automation_on.php`, `scripts/api_state.php`, `scripts/install_zip.sh`,
+`scripts/uninstall_ext.sh`, `scripts/jedchecker_cli.php` (JED Checker `develop` branch from the
+command line).
+
+Compare with the plugin on and off: HTML of the other page types (only counters and random 4SEO
+probes may differ); 4SEO title, description, canonical, structured data and breadcrumb on archive
+pages (also `?start=` and month/year filters); sitemap with *Exclude archived* yes and no after a
+new analysis; redirects after a move; PHP log, customizer console, timings.
+
 JED Checker (https://github.com/joomla-extensions/jedchecker) needs the *Behaviour - Backward
-Compatibility 6* plugin on Joomla 6; switch it on only for the check.
+Compatibility 6* plugin on Joomla 6; switch it on only for the check. Run both branches: `master`
+(UI upload) and `develop` (`scripts/jedchecker_cli.php`). The `develop` rule PH3 wants a
+`<licence>` element mentioning GPL, which its own manifest validation then reports as an unknown
+element (notice): that single notice is expected.
 
 ## Build and release
 

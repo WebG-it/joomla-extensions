@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.0 (2026-10-16)
+
+Compatibility release: tested together with Essentials for YOOtheme Pro and 4SEO.
+
+- New option *301 redirect from the old address* (on by default): when the category is part of
+  the article URL, the automation stores a 301 redirect from the old to the new address in the
+  Joomla *Redirects* component, both for archived articles moved by the plugin and for published
+  articles that a user moves into the archive category. 4SEO does not create redirects when an
+  article URL changes, so without this the old address returned 404. Administrators are warned
+  if the core *System - Redirect* plugin is off.
+- The *Archive* sources have a description in the source picker, like the other sources when
+  Essentials for YOOtheme Pro is installed.
+- Manifest: added the `<licence>` element required by the `develop` branch of the JED Checker
+  (rule PH3), next to the standard `<license>`.
+- Tested compatibility documented: Joomla 6.2.0 and 5.4.10, PHP 8.4, YOOtheme Pro 5.0.51,
+  Essentials for YOOtheme Pro 3.0.15, 4SEO 7.2.0.
+
 ## 1.1.0 (2026-10-16)
 
 Security review.

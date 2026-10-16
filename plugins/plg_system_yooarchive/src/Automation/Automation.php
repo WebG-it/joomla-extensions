@@ -17,8 +17,10 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Content as ContentTable;
 use Joomla\CMS\Table\Table;
+use Joomla\Component\Content\Site\Helper\RouteHelper;
 use Joomla\Database\DatabaseInterface;
 use Joomla\Database\ParameterType;
 use Joomla\Registry\Registry;
@@ -38,6 +40,10 @@ use Joomla\Registry\Registry;
  *   always archived again, even if it was already there.
  * - Moves need a logged-in user with Edit State on the article (and, by default,
  *   Create on the archive category); articles checked out by another user are skipped.
+ * - A move changes the article URL when the category is part of it: by default a 301
+ *   redirect from the old to the new URL is stored in the Joomla Redirect component,
+ *   both for the moves made by the plugin and for the published articles that a user
+ *   moves into the archive category (archived right after).
  *
  * Archiving is queued during the table store and executed once the article has been
  * saved (onContentAfterSave, also dispatched by Joomla 6 for each batch-moved article,
@@ -87,6 +93,15 @@ final class Automation
     private array $toMove = [];
 
     /**
+     * Public URL that an article had before it was moved into the archive category by a
+     * user (save or batch), keyed by id: used for the redirect once it is archived.
+     *
+     * @var    array<int, string>
+     * @since  1.2.0
+     */
+    private array $oldUrls = [];
+
+    /**
      * @param   Registry                 $params  The plugin parameters.
      * @param   CMSApplicationInterface  $app     The application.
      *
@@ -115,15 +130,28 @@ final class Automation
         $id    = (int) $table->id;
         $db    = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->createQuery()
-            ->select([$db->quoteName('catid'), $db->quoteName('state')])
+            ->select([$db->quoteName('catid'), $db->quoteName('state'), $db->quoteName('language')])
             ->from($db->quoteName('#__content'))
             ->where($db->quoteName('id') . ' = :id')
             ->bind(':id', $id, ParameterType::INTEGER);
 
         $row = $db->setQuery($query)->loadObject();
 
-        if ($row) {
-            $this->before[$id] = ['catid' => (int) $row->catid, 'state' => (int) $row->state];
+        if (!$row) {
+            return;
+        }
+
+        $this->before[$id] = ['catid' => (int) $row->catid, 'state' => (int) $row->state];
+        $target            = $this->getTarget();
+
+        // Published article being moved into the archive category: remember its current
+        // address (built now, with the stored category and alias) for the redirect.
+        if (
+            (int) $table->catid === $target && (int) $row->catid !== $target
+            && (int) $table->state === self::STATE_PUBLISHED
+            && $this->params->get('archive_on_move', 1) && $this->params->get('redirect_on_move', 1)
+        ) {
+            $this->oldUrls[$id] = $this->siteUrl($id, (int) $row->catid, (string) $row->language);
         }
     }
 
@@ -159,8 +187,14 @@ final class Automation
                 $this->toArchive[$id] = $id;
             }
 
+            if (!$arrived) {
+                unset($this->oldUrls[$id]);
+            }
+
             return;
         }
+
+        unset($this->oldUrls[$id]);
 
         // Article archived from the edit form (state changed to archived by a save).
         if (
@@ -270,6 +304,22 @@ final class Automation
                 $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVED_N', \count($pks)));
                 Log::add('Archived articles ' . implode(',', $pks), Log::INFO, 'yooarchive');
             }
+
+            // Articles moved into the archive category by the user: redirect the old address.
+            $redirects = 0;
+
+            foreach ($pks as $pk) {
+                $oldUrl = $this->oldUrls[$pk] ?? '';
+                unset($this->oldUrls[$pk]);
+
+                if ($oldUrl !== '' && $this->addRedirect($pk, $oldUrl, $this->siteUrl($pk, $this->getTarget(), $this->getLanguage($pk)))) {
+                    $redirects++;
+                }
+            }
+
+            if ($redirects) {
+                $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_REDIRECTS_N', $redirects));
+            }
         } catch (\Throwable $e) {
             $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
         } finally {
@@ -321,6 +371,9 @@ final class Automation
             /** @var ContentTable $table */
             $table = $this->app->bootComponent('com_content')->getMVCFactory()->createTable('Article', 'Administrator');
 
+            $redirect  = (bool) $this->params->get('redirect_on_move', 1);
+            $redirects = 0;
+
             foreach ($pks as $pk) {
                 if (!$user->authorise('core.edit.state', 'com_content.article.' . $pk)) {
                     $skipped[$pk] = 'no core.edit.state';
@@ -340,6 +393,7 @@ final class Automation
                     continue;
                 }
 
+                $oldUrl       = $redirect ? $this->siteUrl($pk, (int) $table->catid, (string) $table->language) : '';
                 $table->catid = $target;
 
                 if (!$table->check() || !$table->store()) {
@@ -349,12 +403,20 @@ final class Automation
 
                 $moved[] = $pk;
                 $this->reindex($table);
+
+                if ($oldUrl !== '' && $this->addRedirect($pk, $oldUrl, $this->siteUrl($pk, $target, (string) $table->language))) {
+                    $redirects++;
+                }
             }
 
             if ($moved) {
                 $this->cleanCache();
                 $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_MOVED_N', \count($moved)));
                 Log::add('Moved articles ' . implode(',', $moved) . ' to category ' . $target, Log::INFO, 'yooarchive');
+            }
+
+            if ($redirects) {
+                $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_REDIRECTS_N', $redirects));
             }
 
             if ($skipped) {
@@ -370,6 +432,99 @@ final class Automation
             $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', 'Move failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
         } finally {
             self::$busy = false;
+        }
+    }
+
+    /**
+     * Returns the public URL (path, without domain) of an article in a given category,
+     * built by the site router as in the frontend, or an empty string when the router
+     * cannot build a search engine friendly URL.
+     *
+     * @param   int     $id        The article id.
+     * @param   int     $catid     The category id.
+     * @param   string  $language  The article language.
+     *
+     * @return  string
+     *
+     * @since   1.2.0
+     */
+    private function siteUrl(int $id, int $catid, string $language): string
+    {
+        try {
+            $url = (string) Route::link('site', RouteHelper::getArticleRoute($id, $catid, $language), false);
+        } catch (\Throwable $e) {
+            Log::add('URL of article ' . $id . ' not built: ' . $e->getMessage(), Log::WARNING, 'yooarchive');
+
+            return '';
+        }
+
+        // Without SEF URLs the address does not depend on the category: nothing to redirect.
+        return $url === '' || str_contains($url, 'option=com_content') ? '' : $url;
+    }
+
+    /**
+     * Stores a 301 redirect from the old to the new URL of a moved article in the Joomla
+     * Redirect component (used by the "System - Redirect" plugin on 404 pages). An
+     * existing redirect for the same old URL is updated; a redirect that starts from the
+     * new URL, now a live page again, is unpublished.
+     *
+     * @param   int     $id      The article id.
+     * @param   string  $oldUrl  The URL before the move.
+     * @param   string  $newUrl  The URL after the move.
+     *
+     * @return  bool  True when a redirect has been stored.
+     *
+     * @since   1.2.0
+     */
+    private function addRedirect(int $id, string $oldUrl, string $newUrl): bool
+    {
+        if ($newUrl === '' || $newUrl === $oldUrl) {
+            return false;
+        }
+
+        try {
+            $db    = Factory::getContainer()->get(DatabaseInterface::class);
+            $query = $db->createQuery()
+                ->update($db->quoteName('#__redirect_links'))
+                ->set($db->quoteName('published') . ' = 0')
+                ->where($db->quoteName('old_url') . ' = :new')
+                ->where($db->quoteName('published') . ' = 1')
+                ->bind(':new', $newUrl);
+            $db->setQuery($query)->execute();
+
+            $table = $this->app->bootComponent('com_redirect')->getMVCFactory()->createTable('Link', 'Administrator');
+
+            if (!$table) {
+                return false;
+            }
+
+            $table->load(['old_url' => $oldUrl]);
+
+            $now = Factory::getDate()->toSql();
+            $table->bind([
+                'old_url'       => $oldUrl,
+                'new_url'       => $newUrl,
+                'referer'       => '',
+                'comment'       => 'Archive Layouts for YOOtheme: article ' . $id . ' moved to the archive category',
+                'published'     => 1,
+                'header'        => 301,
+                'created_date'  => $table->created_date ?: $now,
+                'modified_date' => $now,
+            ]);
+
+            if (!$table->check() || !$table->store()) {
+                Log::add('Redirect for article ' . $id . ' not stored: ' . $table->getError(), Log::WARNING, 'yooarchive');
+
+                return false;
+            }
+
+            Log::add('Redirect 301 ' . $oldUrl . ' -> ' . $newUrl . ' (article ' . $id . ')', Log::INFO, 'yooarchive');
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::add('Redirect for article ' . $id . ' not stored: ' . $e->getMessage(), Log::WARNING, 'yooarchive');
+
+            return false;
         }
     }
 
@@ -417,6 +572,25 @@ final class Automation
             ->bind(':catid', $target, ParameterType::INTEGER);
 
         return array_map('intval', $db->setQuery($query)->loadColumn());
+    }
+
+    /**
+     * @param   int  $id  The article id.
+     *
+     * @return  string  The language of the article ('*' when unknown).
+     *
+     * @since   1.2.0
+     */
+    private function getLanguage(int $id): string
+    {
+        $db    = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->createQuery()
+            ->select($db->quoteName('language'))
+            ->from($db->quoteName('#__content'))
+            ->where($db->quoteName('id') . ' = :id')
+            ->bind(':id', $id, ParameterType::INTEGER);
+
+        return (string) ($db->setQuery($query)->loadResult() ?: '*');
     }
 
     /**

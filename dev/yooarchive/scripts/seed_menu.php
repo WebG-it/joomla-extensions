@@ -1,8 +1,10 @@
 <?php
 
 /**
- * Creates two "Archived Articles" menu items on the local dev site through the
- * Joomla Web Services API: one for all categories, one filtered on "Venduti".
+ * Creates the "Archived Articles" menu items of the local dev site through the
+ * Joomla Web Services API (all categories, "Venduti", "Venduti Milano") and two
+ * category blogs ("Immobili", "Venduti") so articles get menu based URLs, as on a
+ * real site (needed by the 4SEO redirect test).
  * Run from dev/yooarchive:
  *   docker compose exec web php /dev-scripts/seed_menu.php
  *
@@ -41,11 +43,14 @@ $db  = new mysqli('db', 'joomla', (string) getenv('DEV_DB_PASSWORD'), 'joomla');
 $cid = (int) $db->query("SELECT extension_id FROM jdev_extensions WHERE element='com_content' AND type='component'")->fetch_row()[0];
 $ven = (int) $db->query("SELECT id FROM jdev_categories WHERE alias='venduti' AND extension='com_content'")->fetch_row()[0];
 $mil = (int) $db->query("SELECT id FROM jdev_categories WHERE alias='venduti-milano' AND extension='com_content'")->fetch_row()[0];
+$imm = (int) $db->query("SELECT id FROM jdev_categories WHERE alias='immobili' AND extension='com_content'")->fetch_row()[0];
 
 $items = [
     ['Archivio', 'archivio', 'index.php?option=com_content&view=archive', []],
     ['Venduti archiviati', 'venduti-archiviati', 'index.php?option=com_content&view=archive&catid[0]=' . $ven, [$ven]],
     ['Venduti Milano', 'venduti-milano-archiviati', 'index.php?option=com_content&view=archive&catid[0]=' . $mil, [$mil]],
+    ['Immobili', 'immobili', 'index.php?option=com_content&view=category&layout=blog&id=' . $imm, null],
+    ['Venduti', 'venduti', 'index.php?option=com_content&view=category&layout=blog&id=' . $ven, null],
 ];
 
 foreach ($items as [$title, $alias, $link, $catids]) {
@@ -53,10 +58,11 @@ foreach ($items as [$title, $alias, $link, $catids]) {
         continue;
     }
 
-    $res = api('POST', '/menus/site/items', [
+    $request = $catids === null ? ['id' => (int) substr($link, strrpos($link, '=') + 1)] : ['catid' => $catids];
+    $res     = api('POST', '/menus/site/items', [
         'title' => $title, 'alias' => $alias, 'menutype' => 'mainmenu', 'type' => 'component', 'link' => $link,
         'component_id' => $cid, 'published' => 1, 'language' => '*', 'parent_id' => 1, 'access' => 1,
-        'request' => ['catid' => $catids], 'params' => ['display_num' => '5', 'orderby_sec' => 'rdate', 'order_date' => 'created'],
+        'request' => $request, 'params' => ['display_num' => '5', 'orderby_sec' => 'rdate', 'order_date' => 'created'],
     ]);
     echo $title . ' -> ' . ($res['data']['id'] ?? 'error') . "\n";
 }

@@ -17,7 +17,9 @@ In più, se lo accendi, tiene gli archiviati in una categoria: clic su **Archivi
 l'articolo finisce nella categoria scelta; sposti un articolo in quella categoria e viene
 archiviato.
 
-Requisiti: Joomla 5 o 6, PHP 8.1+, YOOtheme Pro 5 (provato con 5.0.51 su Joomla 6.2.0 e PHP 8.4).
+Requisiti: Joomla 5 o 6, PHP 8.1+, YOOtheme Pro 5. Provato con YOOtheme Pro 5.0.51 su Joomla 6.2.0 e
+5.4.10 (PHP 8.4), insieme a Essentials for YOOtheme Pro e 4SEO: vedi
+[Compatibilità testata](#compatibilità-testata).
 
 ## 1. Installare
 
@@ -59,10 +61,12 @@ Senza un template assegnato la pagina archivio resta quella di sempre.
 | Categoria archivio | Dove finiscono gli articoli archiviati. Senza categoria, o se la categoria viene cancellata o messa nel cestino, l'automazione si ferma e gli amministratori vedono un avviso. Deve essere **pubblicata**: se non lo è, gli articoli spostati non compaiono nel sito pubblico (neanche nella pagina archivio) e gli amministratori vedono un avviso giallo. |
 | Richiedi il permesso di creare | Acceso di serie: sposta solo se chi archivia può anche creare articoli nella categoria archivio. |
 | Sposta gli articoli archiviati | Archivia (da elenco, barra, modifica o API) = sposta nella categoria. |
+| Redirect 301 dal vecchio indirizzo | Acceso di serie. Se la categoria fa parte dell'URL dell'articolo, entrare nella categoria archivio cambia l'indirizzo: il vecchio viene reindirizzato (301) al nuovo tramite il componente *Reindirizzamenti* di Joomla, sia per gli spostamenti fatti dal plugin sia per gli articoli che un utente sposta nella categoria. Serve il plugin *Sistema - Reindirizzamento* attivo (se è spento gli amministratori vedono un avviso). Se l'indirizzo non cambia non viene salvato nulla. |
 | Archivia gli articoli spostati nella categoria | Un articolo pubblicato salvato o spostato (anche con *Elaborazione in serie*) nella categoria viene archiviato. |
 | Forza archiviato | Spento: puoi ripubblicare apposta un articolo che sta già nella categoria. Acceso: viene riarchiviato sempre. |
 
-Dopo ogni azione compare un messaggio blu che dice cosa ha fatto il plugin. Ricerca
+Dopo ogni azione compare un messaggio blu che dice cosa ha fatto il plugin (anche quanti redirect
+ha salvato: li trovi in *Sistema > Reindirizzamenti*). Ricerca
 intelligente, cache e cronologia si aggiornano come con un clic a mano.
 
 Lingue: lo spostamento non guarda la lingua. Un articolo in inglese finisce nella categoria
@@ -78,6 +82,56 @@ Se qualcosa non va (permesso mancante, alias doppio nella categoria di arrivo) c
 messaggio giallo generico; i dettagli (numeri degli articoli, errore del database) finiscono
 solo nel log `administrator/logs/plg_system_yooarchive.php`. Nel sito pubblico (modifica
 articoli dal frontend) i messaggi li vede solo chi può gestire gli articoli.
+
+## Compatibilità testata
+
+Provato il 16-10-2026 in un ambiente Docker locale (Apache, PHP 8.4.26, MariaDB 11.4) con tutte
+le estensioni qui sotto attive insieme, su due siti:
+
+| Software | Versione |
+|---|---|
+| Joomla | 6.2.0 e 5.4.10 |
+| YOOtheme Pro | 5.0.51 |
+| Essentials for YOOtheme Pro (ZOOlanders) | 3.0.15 (PRO) |
+| 4SEO (Weeblr) | 7.2.0.2824 (full) |
+
+Cosa è stato verificato, su entrambe le versioni di Joomla:
+
+- **Installazione, aggiornamento e disinstallazione** del plugin con le altre estensioni attive,
+  nei due ordini (prima questo plugin e poi 4SEO ed Essentials, e il contrario). Aggiornamento
+  da 1.1.0 a 1.2.0. Log degli errori PHP e console del browser vuoti.
+- **YOOtheme Pro**: i template degli altri tipi di pagina (articolo, blog di categoria, articoli
+  in evidenza, Ricerca intelligente) producono lo stesso HTML con il plugin acceso e spento
+  (cambiano solo i contatori di visite e le sonde casuali di 4SEO). Tempo di apertura del
+  customizer e tempi di risposta delle pagine uguali entro il rumore di misura.
+- **Essentials for YOOtheme Pro**: i suoi elementi (Markdown, Social Sharing) e le sue sorgenti
+  (una sorgente CSV) funzionano in tutti i template, compreso *Articoli archiviati*; il gruppo
+  *Archivio* compare nel selettore delle sorgenti degli elementi Essentials e li alimenta; i
+  filtri di Essentials (per esempio *Date modify*) funzionano sui campi dell'archivio; nessun
+  conflitto di nomi di tipi GraphQL o di sorgenti, di eventi del builder o di tipi di template.
+  Il customizer si apre senza errori.
+- **4SEO**: nelle pagine archivio costruite col template titolo, meta description, canonical,
+  dati strutturati e breadcrumb sono identici a quelli della pagina archivio normale di Joomla
+  (plugin spento), anche sulle pagine numerate (`?start=`) e con i filtri mese e anno.
+  L'analisi del sito di 4SEO segue i link del template (articoli e paginazione). Sitemap con
+  *Escludi archiviati* attivo: gli articoli archiviati restano fuori; spento: compaiono con il
+  nuovo indirizzo dopo lo spostamento fatto dall'automazione.
+
+Non provato: l'aggiornamento di YOOtheme Pro a 5.0.52 con il plugin attivo (pacchetto non
+disponibile), i *Flussi di lavoro* di Joomla.
+
+**Note per chi usa 4SEO.** 4SEO non crea un redirect quando un articolo cambia indirizzo. Se la
+categoria fa parte degli URL degli articoli tieni accesa l'opzione *Redirect 301 dal vecchio
+indirizzo* (con il plugin *Sistema - Reindirizzamento* di Joomla attivo). Dopo aver archiviato
+molti articoli insieme rifai l'analisi del sito in 4SEO (*Pagine > Reset analisi*), così sitemap
+e canonical usano i nuovi indirizzi. Le pagine numerate dell'archivio sono trattate da 4SEO come
+tutte le altre.
+
+**Note per chi usa Essentials.** Nell'elemento *Social Sharing* lascia vuoto l'URL condiviso per
+condividere la pagina corrente: se lo colleghi al campo *Link* dell'articolo riceve un indirizzo
+non SEF, sul template archivio come sul template articolo di YOOtheme (comportamento di Essentials).
+
+![Gruppo Archivio nel selettore delle sorgenti di un elemento Essentials](./images/essentials-source-picker.jpg)
 
 ## 4. Aggiornare
 

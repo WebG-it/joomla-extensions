@@ -1,0 +1,141 @@
+{
+ "type": "layout",
+ "version": "5.0.51",
+ "children": [
+  {
+   "type": "section",
+   "props": {
+    "style": "default",
+    "width": "default"
+   },
+   "children": [
+    {
+     "type": "row",
+     "props": {},
+     "children": [
+      {
+       "type": "column",
+       "props": {
+        "width_bp": "m"
+       },
+       "children": [
+        {
+         "type": "text",
+         "props": {
+          "content": "<p class=\"compat-marker\">COMPAT-article</p>"
+         }
+        },
+        {
+         "type": "headline",
+         "props": {
+          "title_element": "h1",
+          "content": ""
+         },
+         "source": {
+          "query": {
+           "name": "article"
+          },
+          "props": {
+           "content": {
+            "name": "title"
+           }
+          }
+         }
+        },
+        {
+         "type": "yooessentials_markdown",
+         "props": {
+          "content": "",
+          "class": "compat-md"
+         },
+         "source": {
+          "query": {
+           "name": "article"
+          },
+          "props": {
+           "content": {
+            "name": "title",
+            "filters": {
+             "before": "## MD: "
+            }
+           }
+          }
+         }
+        },
+        {
+         "type": "yooessentials_social_sharing",
+         "props": {
+          "link_style": "button",
+          "class": "compat-share"
+         },
+         "children": [
+          {
+           "type": "yooessentials_social_sharing_item",
+           "props": {
+            "network": "facebook"
+           },
+           "source": {
+            "query": {
+             "name": "article"
+            },
+            "props": {
+             "shared_url": {
+              "name": "link"
+             },
+             "shared_text": {
+              "name": "title"
+             }
+            }
+           }
+          }
+         ]
+        },
+        {
+         "type": "grid",
+         "props": {
+          "grid_default": "1",
+          "grid_medium": "3",
+          "show_title": true,
+          "show_content": true,
+          "show_meta": true,
+          "show_link": true,
+          "class": "compat-csv"
+         },
+         "children": [
+          {
+           "type": "grid_item",
+           "props": {},
+           "source": {
+            "query": {
+             "name": "csvA1b2c3",
+             "field": {
+              "name": "records",
+              "arguments": {}
+             }
+            },
+            "props": {
+             "title": {
+              "name": "comune"
+             },
+             "meta": {
+              "name": "provincia"
+             },
+             "content": {
+              "name": "abitanti",
+              "filters": {
+               "before": "Abitanti: "
+              }
+             }
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

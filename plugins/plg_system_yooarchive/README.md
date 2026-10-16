@@ -5,7 +5,9 @@ Joomla archive view (`com_content` view `archive`, menu item type *Articles > Ar
 Articles*), plus an optional automation that keeps archived articles in one category.
 
 - Joomla 5.x and 6.x, PHP 8.1 or later, YOOtheme Pro 5 (with YOOtheme missing or older than
-  5.0 the builder part stays off and administrators are warned; the automation still works) (tested on Joomla 6.2.0, PHP 8.4, YOOtheme Pro 5.0.51).
+  5.0 the builder part stays off and administrators are warned; the automation still works).
+- Tested on Joomla 6.2.0 and 5.4.10, PHP 8.4, YOOtheme Pro 5.0.51, together with Essentials for
+  YOOtheme Pro 3.0.15 and 4SEO 7.2.0 (see *Tested compatibility* below).
 - Nothing is written inside `templates/yootheme`: the plugin survives YOOtheme updates.
 - License: GNU GPL version 2 or later (see `LICENSE.txt`).
 
@@ -51,6 +53,11 @@ In the plugin options, tab *Automation*:
 - **Require create permission** (on by default): see *Permissions* below.
 - **Move archived articles**: an article archived from the list, the toolbar, the edit form or
   the Web Services API is moved to the archive category.
+- **301 redirect from the old address** (on by default): when the category is part of the
+  article URL, entering the archive category changes the address; the old one is redirected
+  (301) to the new one with a record in the Joomla *Redirects* component (served by the core
+  *System - Redirect* plugin; administrators are warned if it is off). Applies to the moves made
+  by the plugin and to the published articles that a user moves into the archive category.
 - **Archive articles moved into the category**: a published article saved into the archive
   category, or moved there with *Batch*, is archived.
 - **Force archived** (off by default): when on, a published article in the archive category is
@@ -72,6 +79,52 @@ messages are shown only to users who can manage articles.
 Limits: one archive category per site; moves ignore the article language (use a category with
 language *All* on multilingual sites); not tested with Joomla *Workflows* enabled (the
 default is off).
+
+## Tested compatibility
+
+Tested on 16-10-2026 in a local Docker environment (Apache, PHP 8.4.26, MariaDB 11.4) with all
+the extensions below active together, on two sites:
+
+| Software | Version |
+|---|---|
+| Joomla | 6.2.0 and 5.4.10 |
+| YOOtheme Pro | 5.0.51 |
+| Essentials for YOOtheme Pro (ZOOlanders) | 3.0.15 (PRO) |
+| 4SEO (Weeblr) | 7.2.0.2824 (full) |
+
+What was checked, on both Joomla versions:
+
+- **Install, update and uninstall** of this plugin with the other extensions active, in both
+  orders (this plugin first, then 4SEO and Essentials; and the other way round). Update from
+  1.1.0 to 1.2.0. PHP error log and browser console empty.
+- **YOOtheme Pro**: templates of the other page types (single article, category blog, featured
+  articles, Smart Search) render the same HTML with this plugin on and off (only hit counters and
+  random 4SEO probes differ). Customizer opening time and page response times are the same
+  within measurement noise.
+- **Essentials for YOOtheme Pro**: its elements (Markdown, Social Sharing) and its sources (a CSV
+  source) work in every template, including *Archived Articles*; the *Archive* group appears in
+  the source picker of Essentials elements and feeds them; Essentials source filters (for
+  example *Date modify*) work on the archive fields; no clash of GraphQL type or source names,
+  of builder events or of template types. The customizer opens with no error.
+- **4SEO**: on archive pages built with the template, title, meta description, canonical,
+  structured data and breadcrumb are identical to those of the plain Joomla archive page
+  (plugin off), also on numbered pages (`?start=`) and with month and year filters. The 4SEO site
+  analysis follows the links of the template (articles and pagination). Sitemap with *Exclude
+  archived* on: archived articles are left out; off: they are listed with their new address
+  after the automation has moved them.
+
+Not tested: the update of YOOtheme Pro to 5.0.52 with this plugin active (the package was not
+available), Joomla *Workflows*.
+
+**Notes for 4SEO users.** 4SEO does not create a redirect when an article changes URL. Keep the
+option *301 redirect from the old address* on (with the core *System - Redirect* plugin on) if
+the category is part of your article URLs. After archiving many articles at once, run a new
+site analysis in 4SEO (*Pages > Reset analysis*) so that sitemap and canonical tags use the new
+addresses. Numbered archive pages are treated by 4SEO like any other page.
+
+**Notes for Essentials users.** In the *Social Sharing* element leave the shared URL empty to
+share the current page: mapped to the article *Link* field it receives a non-SEF address, on the
+archive template as on the YOOtheme article template (Essentials behaviour).
 
 ## Uninstall
 

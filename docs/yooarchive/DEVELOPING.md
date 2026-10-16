@@ -60,6 +60,16 @@ contesto `com_content.article`.
   bloccati da un altro utente; mai per ospiti o CLI. A video solo stringhe di lingua generiche,
   dettagli solo in `Log::add()`. Categoria archivio inesistente o nel cestino = automazione ferma
   e avviso agli amministratori.
+- Redirect (opzione *Redirect 301 dal vecchio indirizzo*, dalla 1.2.0): l'URL pubblico si
+  calcola con `Route::link('site', RouteHelper::getArticleRoute(id, catid, lingua))` prima e
+  dopo il cambio di categoria (per lo spostamento fatto dal plugin dentro `move()`, per
+  l'articolo pubblicato portato nella categoria da un utente in `onTableBeforeStore`, con
+  categoria e alias ancora quelli salvati). Se gli URL differiscono e sono SEF si salva una riga
+  in `#__redirect_links` con la tabella `Link` di com_redirect (301, riga esistente con lo
+  stesso vecchio URL aggiornata; una riga che parte dal nuovo URL, di nuovo pagina viva, viene
+  spenta). La serve il plugin core *System - Redirect* sui 404; se e' spento gli
+  amministratori vedono un avviso in Plugin e Reindirizzamenti. 4SEO non crea redirect da solo
+  quando cambia l'URL di un articolo (provato con 4SEO 7.2.0).
 
 ## 2. Ambiente di prova (Docker)
 
@@ -119,12 +129,62 @@ dell'automazione con un utente Manager di prova),
 
 Fermare: `docker compose stop`. Rifare da zero: `docker compose down -v`.
 
+### Prove di compatibilità (YOOtheme Pro, Essentials, 4SEO)
+
+Servono copie con licenza delle estensioni di terzi, **fuori dal repo** (come YOOtheme), in una
+cartella con una sottocartella per estensione che contiene i file installati di un sito, con
+gli stessi percorsi del sito (`plugins/system/yooessentials`, `media/yooessentials`,
+`administrator/components/com_forseo`, `plugins/system/forseo`, ...). Non copiare file di
+configurazione o chiavi: Essentials rigenera da solo il suo `secret.php`.
+
+Due siti affiancati, Joomla 6.2 e 5.4, con un file env ciascuno (fuori dal git, per esempio in
+`.cache/`) che aggiunge `VENDOR_DIR` (la cartella sopra), `JOOMLA_ZIP` (zip ufficiale verificato
+con lo sha256 della release, per esempio `./.cache/joomla-5.4.10.zip`) e una `DEV_PORT` diversa:
+
+```bash
+dc() { MSYS_NO_PATHCONV=1 docker compose -p yooarchive-j6 --env-file .cache/compat-j6.env \
+       -f docker-compose.yml -f docker-compose.compat.yml "$@"; }
+dc up -d && dc exec web bash /dev-scripts/setup.sh
+dc exec web php /dev-scripts/seed.php && dc exec web php /dev-scripts/seed_menu.php
+dc exec web bash /dev-scripts/loopback_port.sh        # il sito raggiunge il proprio URL (analisi 4SEO)
+dc exec web bash /dev-scripts/install_vendor.sh forseo-7.2.0.2824      # installazione "Scopri"
+dc exec web bash /dev-scripts/install_vendor.sh yooessentials-3.0.15
+dc exec web php /dev-scripts/essentials_csv.php       # sorgente CSV di Essentials per le prove
+```
+
+I plugin installati con *Scopri* nascono spenti: accenderli (`sql.php`) e completare la
+procedura iniziale di 4SEO dal backend. Con una porta diversa da 80 il crawler di 4SEO si
+reindirizza su se stesso (confronta la radice canonica senza porta): per le prove impostare la
+radice canonica di 4SEO a `http://localhost/` e il ritardo sitemap al minimo.
+
+Layout di prova in `layouts/compat/` (generati da `make_layouts.py`): ogni tipo di pagina
+(archivio, articolo, categoria, home, ricerca) ha un testo marcatore `COMPAT-<tipo>`, elementi
+YOOtheme ed elementi Essentials alimentati dalla sorgente della pagina e una griglia sulla
+sorgente CSV di Essentials. Si assegnano con `scripts/template.php`.
+
+Altri strumenti: `scripts/automation_on.php` (automazione accesa su una categoria),
+`scripts/api_state.php` (cambia stato o categoria di un articolo via API), `scripts/install_zip.sh`
+e `scripts/uninstall_ext.sh` (installare e togliere un'estensione da CLI),
+`scripts/jedchecker_cli.php` (JED Checker ramo `develop` da riga di comando).
+
+Cosa confrontare, col plugin acceso e spento: HTML delle pagine degli altri tipi (devono
+differire solo contatori e sonde casuali di 4SEO), title, description, canonical, dati
+strutturati e breadcrumb di 4SEO nelle pagine archivio (anche `?start=` e filtri mese/anno),
+sitemap con *Escludi archiviati* sì e no dopo un nuovo giro di analisi, redirect dopo uno
+spostamento, log PHP, console del customizer, tempi.
+
 ### JED Checker
 
 Il checker ufficiale (https://github.com/joomla-extensions/jedchecker, ramo master) su Joomla 6
 richiede il plugin *Behaviour - Backward Compatibility 6* acceso (usa classi Filesystem tolte
 in J6). Accenderlo solo per il controllo e rispegnerlo dopo: il plugin va collaudato col
 compat spento, come su un sito Joomla 6 pulito.
+
+Si passano entrambi i rami: `master` (caricamento dello zip dal backend) e `develop`
+(`scripts/jedchecker_cli.php`, il ramo `develop` ha una classe API e si installa compilando i
+segnaposto del suo manifest). La regola PH3 di `develop` vuole un elemento `<licence>` che citi
+la GPL, e la validazione del manifest dello stesso ramo lo segnala come elemento sconosciuto
+(nota): quell'unica nota è attesa. `master` lo segnala solo come informazione.
 
 ## 3. Compilare
 
@@ -138,7 +198,8 @@ stesso sorgente = stesso sha256 su ogni PC (`.gitattributes` forza LF). Mai `Com
 ## 4. Rilasciare
 
 1. Bump `<version>` in `yooarchive.xml`, voce in `CHANGELOG.md` e in `changelogs/yooarchive.xml`.
-2. Compila, ripassa JED Checker (zero errori e zero avvisi), collaudo nel Docker.
+2. Compila, ripassa JED Checker `master` e `develop` (zero errori e zero avvisi), collaudo nel
+   Docker, prove di compatibilità se cambiano YOOtheme, Essentials o 4SEO.
 3. Copia lo zip in `dist/plg_system_yooarchive-X.Y.Z.zip`.
 4. Crea/aggiorna `updates/yooarchive.xml` copiando `updates/cfpurge.xml`: element `yooarchive`,
    folder `system`, versione, downloadurl, sha256 stampato dalla build,

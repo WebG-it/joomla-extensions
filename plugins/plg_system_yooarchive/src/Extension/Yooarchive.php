@@ -12,6 +12,7 @@ namespace WebG\Plugin\System\Yooarchive\Extension;
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use WebG\Plugin\System\Yooarchive\Automation\Automation;
@@ -106,8 +107,9 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
 
     /**
      * Shows configuration warnings to the users who manage plugins: archive category
-     * missing, trashed or unpublished; YOOtheme Pro missing or older than 5.0 (only on
-     * the extension and template screens, to avoid noise on every page).
+     * missing, trashed or unpublished; redirects on but the "System - Redirect" plugin
+     * off; YOOtheme Pro missing or older than 5.0 (only on the extension, redirect and
+     * template screens, to avoid noise on every page).
      *
      * @return  void
      *
@@ -131,6 +133,15 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
         }
 
         $option = $app->getInput()->getCmd('option');
+
+        // The redirects stored after a move are served by the core "System - Redirect" plugin.
+        if (
+            \in_array($option, ['com_plugins', 'com_redirect'], true)
+            && $this->params->get('automation') && $this->params->get('move_on_archive', 1)
+            && $this->params->get('redirect_on_move', 1) && !PluginHelper::isEnabled('system', 'redirect')
+        ) {
+            $app->enqueueMessage(Text::_('PLG_SYSTEM_YOOARCHIVE_MSG_REDIRECT_PLUGIN_OFF'), 'warning');
+        }
 
         if (\in_array($option, ['com_plugins', 'com_installer', 'com_templates'], true)) {
             $version = $this->getYoothemeVersion();

@@ -58,7 +58,10 @@ if [ ! -d templates/yootheme ]; then
     SQL "UPDATE ${DB_PREFIX}template_styles SET home='1' WHERE client_id=0 AND template='yootheme' ORDER BY id LIMIT 1"
 fi
 
-if [ ! -d administrator/language/it-IT ]; then
+JMAJOR=$(php -r 'define("_JEXEC", 1); require "libraries/src/Version.php"; echo Joomla\CMS\Version::MAJOR_VERSION;')
+if [ ! -d administrator/language/it-IT ] && [ "$JMAJOR" != "6" ]; then
+    echo "== Joomla $JMAJOR: skipping the Italian language pack (only the Joomla 6.2 pack is pinned here)"
+elif [ ! -d administrator/language/it-IT ]; then
     echo "== Installing the official Italian language pack (to test the it-IT strings)"
     curl -sL -o tmp/it-IT.zip "https://downloads.joomla.org/language-packs/translations-joomla6/downloads/joomla6-italian/6-2-0-1/it-it_joomla_lang_full_6-2-0v1-zip?format=zip"
     chown www-data tmp/it-IT.zip

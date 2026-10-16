@@ -1,4 +1,4 @@
-# Local test environment for plg_system_yooarchive: Joomla 6.2 + PHP 8.4 + MariaDB 11.4.
+# Local test environment for plg_system_yooarchive: Joomla 6.2 (or 5.4, see JOOMLA_ZIP) + PHP 8.4 + MariaDB 11.4.
 # Only for local development on localhost. Passwords come from .env (not versioned,
 # copy .env.example and choose your own values).
 # See dev/yooarchive/README.md for setup, including where to get YOOtheme Pro
@@ -22,8 +22,8 @@ services:
       retries: 30
 
   web:
-    # Official image used only for its PHP 8.4 + Apache runtime; Joomla 6.2.0 is
-    # extracted from the official release zip by scripts/entrypoint.sh.
+    # Official image used only for its PHP 8.4 + Apache runtime; Joomla (6.2.0 by
+    # default, JOOMLA_ZIP for another release) is extracted by scripts/entrypoint.sh.
     image: joomla:6.1-php8.4-apache
     depends_on:
       db:
@@ -39,7 +39,7 @@ services:
       - site:/var/www/html
       - ./scripts:/dev-scripts:ro
       - ./layouts:/dev-layouts:ro
-      - ./.cache/joomla-6.2.0.zip:/joomla.zip:ro
+      - ${JOOMLA_ZIP:-./.cache/joomla-6.2.0.zip}:/joomla.zip:ro
       - ${YOOTHEME_SRC:-./vendor-yootheme}:/yootheme:ro
       - ../../build/out:/dist:ro
 

@@ -5,9 +5,10 @@
     <creationDate>2026-10</creationDate>
     <copyright>(C) 2026 Marco Galassi / WebG</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <licence>GNU GPL version 2 or later (GPL-2.0-or-later); see LICENSE.txt</licence>
     <authorEmail>marco.galassi@webg.it</authorEmail>
     <authorUrl>https://www.webg.it</authorUrl>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <description>PLG_SYSTEM_YOOARCHIVE_XML_DESCRIPTION</description>
     <namespace path="src">WebG\Plugin\System\Yooarchive</namespace>
     <scriptfile>script.php</scriptfile>
@@ -82,6 +83,19 @@
                     type="radio"
                     label="PLG_SYSTEM_YOOARCHIVE_FIELD_MOVE_ON_ARCHIVE_LABEL"
                     description="PLG_SYSTEM_YOOARCHIVE_FIELD_MOVE_ON_ARCHIVE_DESC"
+                    layout="joomla.form.field.radio.switcher"
+                    default="1"
+                    filter="integer"
+                    showon="automation:1"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+                <field
+                    name="redirect_on_move"
+                    type="radio"
+                    label="PLG_SYSTEM_YOOARCHIVE_FIELD_REDIRECT_ON_MOVE_LABEL"
+                    description="PLG_SYSTEM_YOOARCHIVE_FIELD_REDIRECT_ON_MOVE_DESC"
                     layout="joomla.form.field.radio.switcher"
                     default="1"
                     filter="integer"

@@ -1,0 +1,86 @@
+{
+ "type": "layout",
+ "version": "5.0.51",
+ "children": [
+  {
+   "type": "section",
+   "props": {
+    "style": "default",
+    "width": "default"
+   },
+   "children": [
+    {
+     "type": "row",
+     "props": {},
+     "children": [
+      {
+       "type": "column",
+       "props": {
+        "width_bp": "m"
+       },
+       "children": [
+        {
+         "type": "text",
+         "props": {
+          "content": "<p class=\"compat-marker\">COMPAT-search</p>"
+         }
+        },
+        {
+         "type": "headline",
+         "props": {
+          "title_element": "h1",
+          "content": ""
+         },
+         "source": {
+          "query": {
+           "name": "smartSearch"
+          },
+          "props": {
+           "content": {
+            "name": "searchword",
+            "filters": {
+             "before": "Ricerca: "
+            }
+           }
+          }
+         }
+        },
+        {
+         "type": "grid",
+         "props": {
+          "grid_default": "1",
+          "grid_medium": "3",
+          "show_title": true,
+          "show_content": true,
+          "show_meta": true,
+          "show_link": true,
+          "class": "compat-search"
+         },
+         "children": [
+          {
+           "type": "grid_item",
+           "props": {},
+           "source": {
+            "query": {
+             "name": "smartSearchItems"
+            },
+            "props": {
+             "title": {
+              "name": "title"
+             },
+             "link": {
+              "name": "route"
+             }
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

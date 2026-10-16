@@ -55,10 +55,11 @@ class ArchiveQueryType
                         'order_direction' => ['type' => 'String', 'defaultValue' => 'DESC'],
                     ],
                     'metadata' => [
-                        'label'  => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_ARTICLES'),
-                        'view'   => $view,
-                        'group'  => $group,
-                        'fields' => [
+                        'label'       => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_ARTICLES'),
+                        'description' => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_ARTICLES_DESC'),
+                        'view'        => $view,
+                        'group'       => $group,
+                        'fields'      => [
                             '_offset' => [
                                 'description' => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_OFFSET_DESC'),
                                 'type'        => 'grid',
@@ -123,10 +124,11 @@ class ArchiveQueryType
                         'offset' => ['type' => 'Int', 'defaultValue' => 0],
                     ],
                     'metadata' => [
-                        'label'  => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_ARTICLE'),
-                        'view'   => $view,
-                        'group'  => $group,
-                        'fields' => [
+                        'label'       => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_ARTICLE'),
+                        'description' => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_ARTICLE_DESC'),
+                        'view'        => $view,
+                        'group'       => $group,
+                        'fields'      => [
                             'offset' => [
                                 'label'       => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_START'),
                                 'description' => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_SINGLE_DESC'),
@@ -144,9 +146,10 @@ class ArchiveQueryType
                 'yooarchive' => [
                     'type'     => 'YooarchiveInfo',
                     'metadata' => [
-                        'label' => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_INFO'),
-                        'view'  => $view,
-                        'group' => $group,
+                        'label'       => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_INFO'),
+                        'description' => Text::_('PLG_SYSTEM_YOOARCHIVE_SOURCE_INFO_DESC'),
+                        'view'        => $view,
+                        'group'       => $group,
                     ],
                     'extensions' => [
                         'call' => __CLASS__ . '::resolveInfo',

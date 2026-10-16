@@ -6,7 +6,7 @@ Extensions*.
 
 | Extension | Type | Version | Docs |
 |---|---|---|---|
-| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 1.1.0 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
+| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 1.2.0 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
 | Cloudflare Cache Purge | plugin / content | 1.1.4 | [Uso (IT)](./docs/USO.md) |
 
 Support: [GitHub issues](https://github.com/WebG-it/joomla-extensions/issues) (write your
@@ -30,13 +30,15 @@ and featured pages, and optionally keep archived articles in one category automa
   filtered month and year, ready-made filter form). Works with the YOOtheme Pagination element.
 - Optional automation: *Archive* moves the article to a chosen category; a published article
   saved or batch-moved into that category is archived through the Joomla model (Smart Search,
-  cache and versions stay in sync). Permission-aware, off by default.
+  cache and versions stay in sync). Permission-aware, off by default. When an article changes
+  URL a 301 redirect from the old address is stored in Joomla Redirects.
 - Survives YOOtheme updates (nothing is written in the template folder). English and Italian.
 
-**Requirements**: Joomla 5 or 6, PHP 8.1+, YOOtheme Pro 5. Tested on Joomla 6.2.0, PHP 8.4,
-YOOtheme Pro 5.0.51.
+**Requirements**: Joomla 5 or 6, PHP 8.1+, YOOtheme Pro 5. Tested on Joomla 6.2.0 and 5.4.10,
+PHP 8.4, YOOtheme Pro 5.0.51, together with Essentials for YOOtheme Pro 3.0.15 and 4SEO 7.2.0
+([tested compatibility](./docs/yooarchive/USAGE.md#tested-compatibility)).
 
-**Install**: download `plg_system_yooarchive-1.1.0.zip` from the
+**Install**: download `plg_system_yooarchive-1.2.0.zip` from the
 [releases](https://github.com/WebG-it/joomla-extensions/releases) (or [dist/](./dist)), then
 *System > Install > Extensions > Upload Package File*. Full guide: [USAGE.md](./docs/yooarchive/USAGE.md).
 
@@ -83,7 +85,7 @@ https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
 | Plugin | element | Tipo | Versione | Documentazione |
 |--------|---------|------|----------|----------------|
 | Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.4 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
-| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 1.1.0 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
+| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 1.2.0 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
 
 ## Documentazione (due pubblici distinti)
 
