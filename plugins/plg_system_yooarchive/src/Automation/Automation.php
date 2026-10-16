@@ -441,8 +441,31 @@ final class Automation
      */
     public static function isValidTarget(int $catid): bool
     {
+        $state = self::getTargetState($catid);
+
+        return $state !== null && $state !== -2;
+    }
+
+    /**
+     * Returns the published state of a com_content category (1 published, 0 unpublished,
+     * 2 archived, -2 trashed), or null when it does not exist.
+     *
+     * @param   int  $catid  The category id.
+     *
+     * @return  int|null
+     *
+     * @since   1.1.0
+     */
+    public static function getTargetState(int $catid): ?int
+    {
+        static $cache = [];
+
         if ($catid <= 0) {
-            return false;
+            return null;
+        }
+
+        if (\array_key_exists($catid, $cache)) {
+            return $cache[$catid];
         }
 
         $db    = Factory::getContainer()->get(DatabaseInterface::class);
@@ -455,7 +478,7 @@ final class Automation
 
         $published = $db->setQuery($query)->loadResult();
 
-        return $published !== null && (int) $published !== -2;
+        return $cache[$catid] = $published === null ? null : (int) $published;
     }
 
     /**

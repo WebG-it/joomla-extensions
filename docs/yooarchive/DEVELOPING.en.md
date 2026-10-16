@@ -45,15 +45,37 @@ flag prevents recursion. An invalid (missing or trashed) archive category pauses
 port 8765 on 127.0.0.1. Passwords and the YOOtheme Pro folder are set in `.env` (not versioned,
 copy `.env.example`).
 
+On Windows with Git Bash prefix `docker compose exec` and `docker run` with
+`MSYS_NO_PATHCONV=1` (otherwise Git Bash rewrites `/dev-scripts/...` into a Windows path). Not
+needed from PowerShell, Linux or macOS. Run everything from the repository root.
+
 ```bash
+python build/build_plugin.py plugins/plg_system_yooarchive      # zip in build/out/
 cd dev/yooarchive
 mkdir -p .cache && curl -L -o .cache/joomla-6.2.0.zip \
   https://github.com/joomla/joomla-cms/releases/download/6.2.0/Joomla_6.2.0-Stable-Full_Package.zip
+sha256sum .cache/joomla-6.2.0.zip
+# expected: eaafc68b5990d7b9dd9156656d4c3c3547743d1d7a85682a92e2f9121b58f018
 cp .env.example .env        # set YOOTHEME_SRC and the DEV_* passwords
 docker compose up -d
+# wait until the Joomla extraction is finished (Apache starts only afterwards)
+until docker compose logs web | grep -q AH00163; do sleep 3; done
 docker compose exec web bash /dev-scripts/setup.sh
 docker compose exec web php /dev-scripts/seed.php
 docker compose exec web php /dev-scripts/seed_menu.php
+```
+
+`setup.sh` refuses to run on an incomplete extraction (the `.dev-extracted` marker written by
+`entrypoint.sh` at the end is missing).
+
+Install the built zip from the backend (*System > Install > Upload Package File*) or from the
+CLI, copying it into `tmp/` first (the CLI installer fails silently on a Windows-mounted folder);
+the file name comes from the latest version in `build/out/`:
+
+```bash
+ZIP=$(cd ../../build/out && ls plg_system_yooarchive-*.zip | sort -V | tail -1)
+docker compose exec web bash -c "cp /dist/$ZIP tmp/ && chown www-data tmp/$ZIP && \
+  su -s /bin/bash www-data -c 'php cli/joomla.php extension:install --path=/var/www/html/tmp/$ZIP'"
 ```
 
 Test helpers: `scripts/template.php`, `scripts/set_layout.php`, `layouts/*.json`,

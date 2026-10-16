@@ -13,7 +13,8 @@
         </security>
         <addition>
             <item>New option "Require create permission" (on by default) for the archive category.</item>
-            <item>If the archive category is deleted or trashed the automation pauses and administrators see a warning.</item>
+            <item>If the archive category is deleted or trashed the automation pauses and administrators see a warning; if it is unpublished they are warned that moved articles are not public.</item>
+            <item>YOOtheme Pro version check: with YOOtheme Pro missing or older than 5.0 the builder integration stays off and administrators are warned.</item>
         </addition>
     </changelog>
     <changelog>

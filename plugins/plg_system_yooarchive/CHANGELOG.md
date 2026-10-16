@@ -13,6 +13,9 @@ Security review.
 - Archive category deleted or trashed: the automation pauses and administrators are warned.
 - Search text and category titles of *Archive Information* are escaped; the filter form is the
   only HTML field.
+- Archive category unpublished: administrators are warned that moved articles are not public.
+- YOOtheme Pro missing or older than 5.0: the builder integration stays off and administrators
+  are warned on the extension and template screens.
 
 ## 1.0.0 (2026-10-16)
 

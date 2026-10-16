@@ -4,14 +4,15 @@ Joomla system plugin by WebG. It adds to the YOOtheme Pro builder a template typ
 Joomla archive view (`com_content` view `archive`, menu item type *Articles > Archived
 Articles*), plus an optional automation that keeps archived articles in one category.
 
-- Joomla 5.x and 6.x, PHP 8.1 or later, YOOtheme Pro 5 (tested on Joomla 6.2.0, PHP 8.4, YOOtheme Pro 5.0.51).
+- Joomla 5.x and 6.x, PHP 8.1 or later, YOOtheme Pro 5 (with YOOtheme missing or older than
+  5.0 the builder part stays off and administrators are warned; the automation still works) (tested on Joomla 6.2.0, PHP 8.4, YOOtheme Pro 5.0.51).
 - Nothing is written inside `templates/yootheme`: the plugin survives YOOtheme updates.
 - License: GNU GPL version 2 or later (see `LICENSE.txt`).
 
 ## Builder template
 
-After installing (the plugin is enabled automatically) open YOOtheme Pro, *Builder >
-Templates > New template* and choose the page type **Archived Articles**. Assignment:
+After installing (the plugin is enabled automatically) open YOOtheme Pro, sidebar item
+**TEMPLATES**, button **NEW TEMPLATE**, and choose the page **Archived Articles**. Assignment:
 
 | Field | Meaning |
 |---|---|
@@ -45,7 +46,8 @@ Without a template assigned to a page, the archive is rendered by Joomla/YOOthem
 In the plugin options, tab *Automation*:
 
 - **Archive category**: the category that holds the archived articles. If it is deleted or
-  trashed the automation pauses and the administrators see a warning.
+  trashed the automation pauses and the administrators see a warning. It must be published:
+  otherwise moved articles are not public and the administrators see a warning.
 - **Require create permission** (on by default): see *Permissions* below.
 - **Move archived articles**: an article archived from the list, the toolbar, the edit form or
   the Web Services API is moved to the archive category.
@@ -67,7 +69,8 @@ Guests and the command line never move anything.
 the log `administrator/logs/plg_system_yooarchive.php`. In the frontend (article editing) the
 messages are shown only to users who can manage articles.
 
-Limits: one archive category per site; not tested with Joomla *Workflows* enabled (the
+Limits: one archive category per site; moves ignore the article language (use a category with
+language *All* on multilingual sites); not tested with Joomla *Workflows* enabled (the
 default is off).
 
 ## Uninstall

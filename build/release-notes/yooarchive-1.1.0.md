@@ -26,4 +26,4 @@ Docs: [user guide](https://github.com/WebG-it/joomla-extensions/blob/main/docs/y
 [guida in italiano](https://github.com/WebG-it/joomla-extensions/blob/main/docs/yooarchive/USO.md) ·
 [changelog](https://github.com/WebG-it/joomla-extensions/blob/main/plugins/plg_system_yooarchive/CHANGELOG.md)
 
-sha256 `9d370990e43c0df3c2300542b9f69cf8b9d80dc0311279b6403c673a4519a432`
+sha256 `eb5134a07a624e5438d54602b6ba2a2be6dcc7935662af8ba0589ce52c85f795`

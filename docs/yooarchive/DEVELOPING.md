@@ -76,26 +76,39 @@ MariaDB 11.4. Porta locale 8765, solo su 127.0.0.1. Le password le scegli tu in 
 
 Si indica la cartella in `dev/yooarchive/.env` (copia di `.env.example`, mai committato).
 
+Su Windows con Git Bash anteponi `MSYS_NO_PATHCONV=1` ai comandi `docker compose exec` e
+`docker run` (altrimenti Git Bash trasforma `/dev-scripts/...` in un percorso Windows). Da
+PowerShell, Linux o macOS non serve. Tutti i comandi partono dalla radice del repo.
+
 ```bash
+python build/build_plugin.py plugins/plg_system_yooarchive      # zip in build/out/
 cd dev/yooarchive
 mkdir -p .cache && curl -L -o .cache/joomla-6.2.0.zip \
   https://github.com/joomla/joomla-cms/releases/download/6.2.0/Joomla_6.2.0-Stable-Full_Package.zip
-# sha256 atteso: eaafc68b5990d7b9dd9156656d4c3c3547743d1d7a85682a92e2f9121b58f018
+sha256sum .cache/joomla-6.2.0.zip
+# atteso: eaafc68b5990d7b9dd9156656d4c3c3547743d1d7a85682a92e2f9121b58f018
 cp .env.example .env            # imposta YOOTHEME_SRC e le password DEV_*
 docker compose up -d
+# aspetta che l'estrazione di Joomla sia finita (Apache parte solo dopo)
+until docker compose logs web | grep -q AH00163; do sleep 3; done
 docker compose exec web bash /dev-scripts/setup.sh      # Joomla, YOOtheme, lingua it-IT
 docker compose exec web php /dev-scripts/seed.php       # categorie, campi custom, 21 articoli
 docker compose exec web php /dev-scripts/seed_menu.php  # 3 voci "Articoli archiviati"
 ```
 
+`setup.sh` si rifiuta di partire se l'estrazione non e' completa (manca il file marcatore
+`.dev-extracted` scritto da `entrypoint.sh` alla fine).
+
 Admin: http://localhost:8765/administrator (utente `admin`, password `DEV_ADMIN_PASSWORD` del tuo `.env`).
 
-Installare lo zip compilato: dal backend (*Sistema > Installa*) oppure da CLI copiandolo prima
-in `tmp/` (da una cartella montata da Windows l'installer CLI fallisce senza messaggio):
+Installare lo zip compilato: dal backend (*Sistema > Installa > Carica il pacchetto*) oppure da
+CLI copiandolo prima in `tmp/` (da una cartella montata da Windows l'installer CLI fallisce senza
+messaggio). Il nome dello zip si prende dalla versione piu' recente in `build/out/`:
 
 ```bash
-docker compose exec web bash -c 'cp /dist/plg_system_yooarchive-1.0.0.zip tmp/ && chown www-data tmp/*.zip && \
-  su -s /bin/bash www-data -c "php cli/joomla.php extension:install --path=/var/www/html/tmp/plg_system_yooarchive-1.0.0.zip"'
+ZIP=$(cd ../../build/out && ls plg_system_yooarchive-*.zip | sort -V | tail -1)
+docker compose exec web bash -c "cp /dist/$ZIP tmp/ && chown www-data tmp/$ZIP && \
+  su -s /bin/bash www-data -c 'php cli/joomla.php extension:install --path=/var/www/html/tmp/$ZIP'"
 ```
 
 Strumenti di prova (solo sviluppo): `scripts/template.php` (crea/cambia template YOOtheme),

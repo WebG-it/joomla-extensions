@@ -5,6 +5,16 @@
 set -e
 cd /var/www/html
 
+# Refuse to run on an incomplete site (Joomla still being extracted by entrypoint.sh).
+if [ ! -f .dev-extracted ] || [ ! -f index.php ] || [ ! -f libraries/src/Version.php ]; then
+    echo "!! Joomla is not completely extracted yet. Wait for 'AH00163' in 'docker compose logs web' and retry." >&2
+    exit 1
+fi
+if [ ! -f configuration.php ] && [ ! -f installation/joomla.php ]; then
+    echo "!! Incomplete site: no configuration.php and no installation/ folder. Recreate it with 'docker compose down -v'." >&2
+    exit 1
+fi
+
 ADMIN_USER=admin
 ADMIN_PASS="${DEV_ADMIN_PASSWORD:?DEV_ADMIN_PASSWORD missing, see .env.example}"
 DB_PASS="${DEV_DB_PASSWORD:?DEV_DB_PASSWORD missing, see .env.example}"

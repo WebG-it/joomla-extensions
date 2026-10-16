@@ -30,12 +30,13 @@ Requisiti: Joomla 5 o 6, PHP 8.1+, YOOtheme Pro 5 (provato con 5.0.51 su Joomla 
 1. Se non c'è, crea la voce di menu *Articoli > Articoli archiviati*. Nelle opzioni della voce
    scegli le categorie (vuoto = tutte), l'ordine (*Ordine articoli*, *Data per l'ordinamento*)
    e quanti articoli per pagina (*# Articoli*).
-2. Apri YOOtheme Pro, *Template > Nuovo template*, pagina **Articoli archiviati**.
+2. Apri YOOtheme Pro (menu *YOOtheme* del backend), voce **TEMPLATE** nella barra a sinistra,
+   pulsante **NUOVO TEMPLATE**; in *Pagina* scegli **Articoli archiviati**.
    - *Limita per categorie*: il template vale solo per le voci archivio filtrate su quelle
      categorie (con o senza sottocategorie). Vuoto = tutte le pagine archivio.
    - *Limita per numero di pagina* e *Limita per lingua* come negli altri template.
 3. Disegna il layout. Nel *Contenuto dinamico* di un elemento (per esempio una Griglia) scegli
-   il gruppo **Archivio**:
+   il gruppo **Archivio** (in un'interfaccia in inglese: **Archive**):
    - **Articoli archiviati**: l'elenco della pagina corrente. *Inizio* e *Quantità* per
      prenderne una parte; *Ordine* per riordinare gli articoli della pagina (l'ordine fra le
      pagine resta quello della voce di menu).
@@ -55,7 +56,7 @@ Senza un template assegnato la pagina archivio resta quella di sempre.
 | Opzione | Cosa fa |
 |---|---|
 | Attiva automazione | Accende tutto il resto. |
-| Categoria archivio | Dove finiscono gli articoli archiviati. Senza categoria, o se la categoria viene cancellata o messa nel cestino, l'automazione si ferma e gli amministratori vedono un avviso. |
+| Categoria archivio | Dove finiscono gli articoli archiviati. Senza categoria, o se la categoria viene cancellata o messa nel cestino, l'automazione si ferma e gli amministratori vedono un avviso. Deve essere **pubblicata**: se non lo è, gli articoli spostati non compaiono nel sito pubblico (neanche nella pagina archivio) e gli amministratori vedono un avviso giallo. |
 | Richiedi il permesso di creare | Acceso di serie: sposta solo se chi archivia può anche creare articoli nella categoria archivio. |
 | Sposta gli articoli archiviati | Archivia (da elenco, barra, modifica o API) = sposta nella categoria. |
 | Archivia gli articoli spostati nella categoria | Un articolo pubblicato salvato o spostato (anche con *Elaborazione in serie*) nella categoria viene archiviato. |
@@ -63,6 +64,10 @@ Senza un template assegnato la pagina archivio resta quella di sempre.
 
 Dopo ogni azione compare un messaggio blu che dice cosa ha fatto il plugin. Ricerca
 intelligente, cache e cronologia si aggiornano come con un clic a mano.
+
+Lingue: lo spostamento non guarda la lingua. Un articolo in inglese finisce nella categoria
+archivio anche se quella categoria è in italiano; su un sito multilingua usa una categoria
+archivio con lingua *Tutte*.
 
 Permessi: l'articolo viene spostato solo se chi lo archivia è un utente collegato con il
 permesso *Modifica stato* sull'articolo (e, con l'opzione accesa, *Crea* nella categoria

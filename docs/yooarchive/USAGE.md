@@ -33,12 +33,13 @@ Joomla 6.2.0 and PHP 8.4).
 1. Create (if missing) a menu item *Articles > Archived Articles*. In its options choose the
    categories (empty = all), the order (*Article Order*, *Date for Ordering*) and the number
    of articles per page (*# Articles*).
-2. In YOOtheme Pro open *Templates > New Template*, page **Archived Articles**:
+2. Open YOOtheme Pro (backend menu *YOOtheme*), item **TEMPLATES** in the left sidebar, button
+   **NEW TEMPLATE**; in *Page* choose **Archived Articles**:
    - *Limit by Categories*: the template applies only to archive menu items filtered on
      those categories (with or without child categories). Empty = every archive page.
    - *Limit by Page Number* and *Limit by Language* as for the other templates.
 3. Design the layout. In the *Dynamic Content* of an element (for example a Grid) choose the
-   **Archive** group:
+   **Archive** group (**Archivio** in an Italian interface):
    - **Archived Articles**: the list of the current page. *Start* and *Quantity* take a part
      of it; *Order* re-sorts the current page (the order across pages is the one of the menu item).
    - **Archived Article**: a single article.
@@ -60,7 +61,7 @@ Without an assigned template the archive page stays as it was.
 | Option | What it does |
 |---|---|
 | Enable automation | Switches everything below on. |
-| Archive category | Where archived articles go. Without a category, or if the category is deleted or trashed, the automation pauses and administrators see a warning. |
+| Archive category | Where archived articles go. Without a category, or if the category is deleted or trashed, the automation pauses and administrators see a warning. It must be **published**: otherwise moved articles do not appear on the public site (not even on the archive page) and administrators see a yellow warning. |
 | Require create permission | On by default: move only if the user who archives can also create articles in the archive category. |
 | Move archived articles | Archive (list, toolbar, edit form or API) = move to the category. |
 | Archive articles moved into the category | A published article saved or moved (also with *Batch*) into the category is archived. |
@@ -68,6 +69,9 @@ Without an assigned template the archive page stays as it was.
 
 After each action a blue message tells what the plugin did. Smart Search, cache and versions
 are updated as with a manual click.
+
+Languages: moves ignore the language. An English article is moved to the archive category even
+if that category is Italian; on a multilingual site use an archive category with language *All*.
 
 Permissions: an article is moved only when a logged-in user with *Edit State* on the article
 archives it (and, with the option on, with *Create* in the archive category). Articles being
