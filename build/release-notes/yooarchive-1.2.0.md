@@ -16,13 +16,12 @@ together with **Essentials for YOOtheme Pro** and **4SEO** on Joomla 6.2 and 5.4
 - Manifest: `<licence>` element required by the `develop` branch of the JED Checker (rule PH3).
 
 **Tested compatibility** (all active together): Joomla 6.2.0 and 5.4.10, PHP 8.4, YOOtheme Pro
-5.0.51, Essentials for YOOtheme Pro 3.0.15, 4SEO 7.2.0.2824. Install, update and uninstall in both
-orders; Essentials elements, sources and filters in every template including *Archived
+5.0.51, Essentials for YOOtheme Pro 3.0.15, 4SEO 7.2.0.2824. Install, update and uninstall with the others active (plugin first, and reinstalled after them); Essentials elements, sources and filters in every template including *Archived
 Articles*; other YOOtheme templates unchanged; 4SEO title, description, canonical, structured
 data, breadcrumb and sitemap unchanged. Details:
 [tested compatibility](https://github.com/WebG-it/joomla-extensions/blob/main/docs/yooarchive/USAGE.md#tested-compatibility).
-JED Checker `master`: no errors, warnings or notices. JED Checker `develop`: no errors or
-warnings, one notice about the `<licence>` element that its own rule PH3 requires.
+JED Checker `master` and `develop`: no errors, no warnings, one notice about the `<licence>`
+element (required by rule PH3 of `develop`, not known to the manifest validation).
 
 **Requirements**: Joomla 5 or 6, PHP 8.1+, YOOtheme Pro 5.
 

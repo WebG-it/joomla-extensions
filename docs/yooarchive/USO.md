@@ -73,6 +73,11 @@ Lingue: lo spostamento non guarda la lingua. Un articolo in inglese finisce nell
 archivio anche se quella categoria è in italiano; su un sito multilingua usa una categoria
 archivio con lingua *Tutte*.
 
+I redirect li scrive il plugin, quindi all'utente non serve alcun permesso sul componente
+Reindirizzamenti; vengono scritti solo per gli spostamenti ammessi dalle regole qui sotto. Un
+redirect già esistente per lo stesso vecchio indirizzo e non creato dal plugin non viene mai
+toccato.
+
 Permessi: l'articolo viene spostato solo se chi lo archivia è un utente collegato con il
 permesso *Modifica stato* sull'articolo (e, con l'opzione accesa, *Crea* nella categoria
 archivio). Gli articoli aperti in modifica da un altro utente non vengono toccati. Ospiti e
@@ -97,9 +102,10 @@ le estensioni qui sotto attive insieme, su due siti:
 
 Cosa è stato verificato, su entrambe le versioni di Joomla:
 
-- **Installazione, aggiornamento e disinstallazione** del plugin con le altre estensioni attive,
-  nei due ordini (prima questo plugin e poi 4SEO ed Essentials, e il contrario). Aggiornamento
-  da 1.1.0 a 1.2.0. Log degli errori PHP e console del browser vuoti.
+- **Installazione, aggiornamento e disinstallazione** del plugin con le altre estensioni attive.
+  Ordine 1: prima questo plugin, poi 4SEO ed Essentials. Ordine 2: plugin disinstallato e
+  reinstallato con 4SEO ed Essentials già attivi. Aggiornamento da 1.1.0 a 1.2.0 e da 1.2.0
+  a 1.2.1 (dal server di aggiornamento). Log degli errori PHP e console del browser vuoti.
 - **YOOtheme Pro**: i template degli altri tipi di pagina (articolo, blog di categoria, articoli
   in evidenza, Ricerca intelligente) producono lo stesso HTML con il plugin acceso e spento
   (cambiano solo i contatori di visite e le sonde casuali di 4SEO). Tempo di apertura del
@@ -112,7 +118,8 @@ Cosa è stato verificato, su entrambe le versioni di Joomla:
   Il customizer si apre senza errori.
 - **4SEO**: nelle pagine archivio costruite col template titolo, meta description, canonical,
   dati strutturati e breadcrumb sono identici a quelli della pagina archivio normale di Joomla
-  (plugin spento), anche sulle pagine numerate (`?start=`) e con i filtri mese e anno.
+  (plugin spento), anche sulle pagine numerate (`?start=`) e con filtri mese e anno che hanno
+  risultati (un filtro senza risultati non è stato confrontato).
   L'analisi del sito di 4SEO segue i link del template (articoli e paginazione). Sitemap con
   *Escludi archiviati* attivo: gli articoli archiviati restano fuori; spento: compaiono con il
   nuovo indirizzo dopo lo spostamento fatto dall'automazione.
@@ -127,6 +134,10 @@ molti articoli insieme rifai l'analisi del sito in 4SEO (*Pagine > Reset analisi
 e canonical usano i nuovi indirizzi. Le pagine numerate dell'archivio sono trattate da 4SEO come
 tutte le altre.
 
+Con URL degli articoli che contengono l'id (`/<id>-alias`) Joomla trova l'articolo dall'id
+qualunque sia la categoria nell'indirizzo: dopo lo spostamento il vecchio URL resta vivo (niente
+404) e il redirect non serve; 4SEO tiene il vecchio canonical fino alla nuova analisi del sito.
+
 **Note per chi usa Essentials.** Nell'elemento *Social Sharing* lascia vuoto l'URL condiviso per
 condividere la pagina corrente: se lo colleghi al campo *Link* dell'articolo riceve un indirizzo
 non SEF, sul template archivio come sul template articolo di YOOtheme (comportamento di Essentials).
@@ -140,5 +151,7 @@ Arriva da *Sistema > Aggiorna > Estensioni* come gli altri plugin WebG.
 ## 5. Disinstallare
 
 *Sistema > Gestisci > Estensioni*, cerca "Layout archivio", *Disinstalla*. Non restano tabelle
-né file. I template del builder di tipo *Articoli archiviati* restano in YOOtheme come "non
+né file del plugin. Restano i redirect salvati dall'automazione in *Sistema > Reindirizzamenti*
+(la nota inizia con "Archive Layouts for YOOtheme:", da lì li togli se vuoi) e il log
+`administrator/logs/plg_system_yooarchive.php` (e `plg_system_yooarchive.1.php`). I template del builder di tipo *Articoli archiviati* restano in YOOtheme come "non
 assegnati" e tornano attivi se reinstalli il plugin; la pagina archivio torna quella di Joomla.

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.1 (2026-10-16)
+
+Review of 1.2.0.
+
+- Redirects: an existing redirect for the same old address that the plugin did not create
+  (made by hand or by another extension) is never changed; the plugin only updates or
+  unpublishes its own redirects, recognised by the note "Archive Layouts for YOOtheme:".
+- The warning about the *System - Redirect* plugin being off also appears when only *Archive
+  articles moved into the category* is on.
+- The plugin log is rotated above 1 MB (one previous file kept as `plg_system_yooarchive.1.php`).
+- Docs: what stays after uninstall (redirects, log), permissions of the redirects, URLs with the
+  article id, scope of the 4SEO comparison, JED Checker results.
+
 ## 1.2.0 (2026-10-16)
 
 Compatibility release: tested together with Essentials for YOOtheme Pro and 4SEO.

@@ -67,6 +67,10 @@ Archiving goes through the Joomla article model (`publish()`), so Smart Search, 
 logs and the other plugins see a normal state change, with the usual permission and check-out
 rules. Moves update the article asset and the Smart Search index. A guard prevents any recursion.
 
+**Redirects** are written by the plugin (no permission on the Redirects component is needed),
+only for the moves allowed below; an existing redirect for the same old address that the plugin
+did not create is never changed. The log is rotated above 1 MB (one previous file kept as `plg_system_yooarchive.1.php`).
+
 **Permissions.** An article is moved only when a logged-in user archives it and that user has
 *Edit State* on the article; with *Require create permission* on, the user also needs *Create*
 in the archive category. Articles being edited by another user (checked out) are skipped.
@@ -94,9 +98,10 @@ the extensions below active together, on two sites:
 
 What was checked, on both Joomla versions:
 
-- **Install, update and uninstall** of this plugin with the other extensions active, in both
-  orders (this plugin first, then 4SEO and Essentials; and the other way round). Update from
-  1.1.0 to 1.2.0. PHP error log and browser console empty.
+- **Install, update and uninstall** of this plugin with the other extensions active. Order 1:
+  this plugin installed first, then 4SEO and Essentials. Order 2: this plugin uninstalled and
+  installed again with 4SEO and Essentials already active. Update from 1.1.0 to 1.2.0 and from
+  1.2.0 to 1.2.1 (through the update server). PHP error log and browser console empty.
 - **YOOtheme Pro**: templates of the other page types (single article, category blog, featured
   articles, Smart Search) render the same HTML with this plugin on and off (only hit counters and
   random 4SEO probes differ). Customizer opening time and page response times are the same
@@ -108,7 +113,8 @@ What was checked, on both Joomla versions:
   of builder events or of template types. The customizer opens with no error.
 - **4SEO**: on archive pages built with the template, title, meta description, canonical,
   structured data and breadcrumb are identical to those of the plain Joomla archive page
-  (plugin off), also on numbered pages (`?start=`) and with month and year filters. The 4SEO site
+  (plugin off), also on numbered pages (`?start=`) and with month and year filters that have
+  results (a filter with no results was not compared). The 4SEO site
   analysis follows the links of the template (articles and pagination). Sitemap with *Exclude
   archived* on: archived articles are left out; off: they are listed with their new address
   after the automation has moved them.
@@ -122,6 +128,10 @@ the category is part of your article URLs. After archiving many articles at once
 site analysis in 4SEO (*Pages > Reset analysis*) so that sitemap and canonical tags use the new
 addresses. Numbered archive pages are treated by 4SEO like any other page.
 
+With article URLs that contain the id (`/<id>-alias`) Joomla finds the article by id whatever
+the category in the address, so the old URL stays live after the move (no 404) and the
+redirect is not used; 4SEO then keeps the old canonical until its next site analysis.
+
 **Notes for Essentials users.** In the *Social Sharing* element leave the shared URL empty to
 share the current page: mapped to the article *Link* field it receives a non-SEF address, on the
 archive template as on the YOOtheme article template (Essentials behaviour).
@@ -130,7 +140,9 @@ archive template as on the YOOtheme article template (Essentials behaviour).
 
 *System > Manage > Extensions*, select the plugin, *Uninstall*. The plugin keeps no tables and
 no files outside its folder. Builder templates of type *Archived Articles* stay in YOOtheme as
-"not assigned" and come back if the plugin is reinstalled.
+"not assigned" and come back if the plugin is reinstalled. The redirects stored by the
+automation stay in *System > Redirects* (note starting with "Archive Layouts for YOOtheme:")
+and the log stays in `administrator/logs/`.
 
 ## Development
 

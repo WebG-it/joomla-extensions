@@ -6,7 +6,7 @@ Extensions*.
 
 | Extension | Type | Version | Docs |
 |---|---|---|---|
-| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 1.2.0 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
+| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 1.2.1 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
 | Cloudflare Cache Purge | plugin / content | 1.1.4 | [Uso (IT)](./docs/USO.md) |
 
 Support: [GitHub issues](https://github.com/WebG-it/joomla-extensions/issues) (write your
@@ -38,7 +38,7 @@ and featured pages, and optionally keep archived articles in one category automa
 PHP 8.4, YOOtheme Pro 5.0.51, together with Essentials for YOOtheme Pro 3.0.15 and 4SEO 7.2.0
 ([tested compatibility](./docs/yooarchive/USAGE.md#tested-compatibility)).
 
-**Install**: download `plg_system_yooarchive-1.2.0.zip` from the
+**Install**: download `plg_system_yooarchive-1.2.1.zip` from the
 [releases](https://github.com/WebG-it/joomla-extensions/releases) (or [dist/](./dist)), then
 *System > Install > Extensions > Upload Package File*. Full guide: [USAGE.md](./docs/yooarchive/USAGE.md).
 
@@ -85,7 +85,7 @@ https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
 | Plugin | element | Tipo | Versione | Documentazione |
 |--------|---------|------|----------|----------------|
 | Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.4 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
-| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 1.2.0 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
+| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 1.2.1 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
 
 ## Documentazione (due pubblici distinti)
 

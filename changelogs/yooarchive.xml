@@ -5,6 +5,19 @@
         <element>yooarchive</element>
         <type>plugin</type>
         <folder>system</folder>
+        <version>1.2.1</version>
+        <security>
+            <item>An existing redirect for the same old address that the plugin did not create is never changed; only the plugin's own redirects are updated or unpublished.</item>
+        </security>
+        <fix>
+            <item>The warning about the System - Redirect plugin being off also appears when only "Archive articles moved into the category" is on.</item>
+            <item>The plugin log is rotated above 1 MB (one previous file kept).</item>
+        </fix>
+    </changelog>
+    <changelog>
+        <element>yooarchive</element>
+        <type>plugin</type>
+        <folder>system</folder>
         <version>1.2.0</version>
         <addition>
             <item>New option "301 redirect from the old address" (on by default): when an article enters the archive category and its URL changes, a 301 redirect from the old address is stored in the Joomla Redirects component. Administrators are warned if the System - Redirect plugin is off.</item>

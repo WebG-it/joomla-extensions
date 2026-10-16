@@ -137,7 +137,8 @@ final class Yooarchive extends CMSPlugin implements SubscriberInterface
         // The redirects stored after a move are served by the core "System - Redirect" plugin.
         if (
             \in_array($option, ['com_plugins', 'com_redirect'], true)
-            && $this->params->get('automation') && $this->params->get('move_on_archive', 1)
+            && $this->params->get('automation')
+            && ($this->params->get('move_on_archive', 1) || $this->params->get('archive_on_move', 1))
             && $this->params->get('redirect_on_move', 1) && !PluginHelper::isEnabled('system', 'redirect')
         ) {
             $app->enqueueMessage(Text::_('PLG_SYSTEM_YOOARCHIVE_MSG_REDIRECT_PLUGIN_OFF'), 'warning');

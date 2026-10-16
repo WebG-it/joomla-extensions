@@ -61,6 +61,22 @@ final class Automation
     private const STATE_ARCHIVED  = 2;
 
     /**
+     * Marker at the start of the comment of every redirect stored by the plugin: only
+     * redirects with this marker are ever changed by the plugin.
+     */
+    public const REDIRECT_MARKER = 'Archive Layouts for YOOtheme:';
+
+    /**
+     * Size above which the plugin log is rotated (one previous file is kept).
+     */
+    private const LOG_MAX_BYTES = 1048576;
+
+    /**
+     * Name of the plugin log file in the Joomla log folder.
+     */
+    private const LOG_FILE = 'plg_system_yooarchive.php';
+
+    /**
      * True while the plugin itself is changing articles: nested events are ignored.
      *
      * @var    bool
@@ -109,7 +125,42 @@ final class Automation
      */
     public function __construct(private Registry $params, private CMSApplicationInterface $app)
     {
-        Log::addLogger(['text_file' => 'plg_system_yooarchive.php'], Log::ALL, ['yooarchive']);
+        self::rotateLog();
+        Log::addLogger(['text_file' => self::LOG_FILE], Log::ALL, ['yooarchive']);
+    }
+
+    /**
+     * Keeps the plugin log small: above 1 MB the file is renamed to
+     * plg_system_yooarchive.1.php (replacing the previous one) and Joomla starts a new file.
+     *
+     * @return  void
+     *
+     * @since   1.2.1
+     */
+    private static function rotateLog(): void
+    {
+        static $done = false;
+
+        if ($done) {
+            return;
+        }
+
+        $done = true;
+
+        try {
+            $dir  = (string) Factory::getApplication()->get('log_path', JPATH_ADMINISTRATOR . '/logs');
+            $file = rtrim($dir, '/\\') .'/' . self::LOG_FILE;
+
+            clearstatcache(true, $file);
+
+            if (is_file($file) && filesize($file) > self::LOG_MAX_BYTES) {
+                // Keep the .php extension: the file starts with Joomla's die() guard, so the
+                // previous log is never served as plain text.
+                @rename($file, substr($file, 0, -4) . '.1.php');
+            }
+        } catch (\Throwable $e) {
+            // Logging must never break the automation.
+        }
     }
 
     /**
@@ -483,13 +534,16 @@ final class Automation
         }
 
         try {
-            $db    = Factory::getContainer()->get(DatabaseInterface::class);
-            $query = $db->createQuery()
+            $db     = Factory::getContainer()->get(DatabaseInterface::class);
+            $marker = self::REDIRECT_MARKER . '%';
+            $query  = $db->createQuery()
                 ->update($db->quoteName('#__redirect_links'))
                 ->set($db->quoteName('published') . ' = 0')
                 ->where($db->quoteName('old_url') . ' = :new')
                 ->where($db->quoteName('published') . ' = 1')
-                ->bind(':new', $newUrl);
+                ->where($db->quoteName('comment') . ' LIKE :marker')
+                ->bind(':new', $newUrl)
+                ->bind(':marker', $marker);
             $db->setQuery($query)->execute();
 
             $table = $this->app->bootComponent('com_redirect')->getMVCFactory()->createTable('Link', 'Administrator');
@@ -498,14 +552,20 @@ final class Automation
                 return false;
             }
 
-            $table->load(['old_url' => $oldUrl]);
+            // A redirect for the same old address that the plugin did not create (made by
+            // hand or by another extension) is never touched.
+            if ($table->load(['old_url' => $oldUrl]) && !str_starts_with((string) $table->comment, self::REDIRECT_MARKER)) {
+                Log::add('Redirect for article ' . $id . ' not stored: a redirect not created by the plugin already exists for ' . $oldUrl, Log::INFO, 'yooarchive');
+
+                return false;
+            }
 
             $now = Factory::getDate()->toSql();
             $table->bind([
                 'old_url'       => $oldUrl,
                 'new_url'       => $newUrl,
                 'referer'       => '',
-                'comment'       => 'Archive Layouts for YOOtheme: article ' . $id . ' moved to the archive category',
+                'comment'       => self::REDIRECT_MARKER . ' article ' . $id . ' moved to the archive category',
                 'published'     => 1,
                 'header'        => 301,
                 'created_date'  => $table->created_date ?: $now,

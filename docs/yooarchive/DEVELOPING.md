@@ -69,7 +69,11 @@ contesto `com_content.article`.
   stesso vecchio URL aggiornata; una riga che parte dal nuovo URL, di nuovo pagina viva, viene
   spenta). La serve il plugin core *System - Redirect* sui 404; se e' spento gli
   amministratori vedono un avviso in Plugin e Reindirizzamenti. 4SEO non crea redirect da solo
-  quando cambia l'URL di un articolo (provato con 4SEO 7.2.0).
+  quando cambia l'URL di un articolo (provato con 4SEO 7.2.0). Dalla 1.2.1 il plugin aggiorna o
+  spegne solo le righe con il commento che inizia con `Automation::REDIRECT_MARKER`; una riga
+  esistente per lo stesso vecchio URL senza marcatore non viene toccata (solo una riga di log).
+- Log: oltre 1 MB `plg_system_yooarchive.php` diventa `plg_system_yooarchive.1.php` (estensione
+  .php per tenere la protezione `die()` di Joomla) e si riparte da un file nuovo.
 
 ## 2. Ambiente di prova (Docker)
 
@@ -184,7 +188,8 @@ Si passano entrambi i rami: `master` (caricamento dello zip dal backend) e `deve
 (`scripts/jedchecker_cli.php`, il ramo `develop` ha una classe API e si installa compilando i
 segnaposto del suo manifest). La regola PH3 di `develop` vuole un elemento `<licence>` che citi
 la GPL, e la validazione del manifest dello stesso ramo lo segnala come elemento sconosciuto
-(nota): quell'unica nota è attesa. `master` lo segnala solo come informazione.
+(nota): quell'unica nota è attesa. Anche `master` lo segnala come nota (badge azzurro): 0 errori,
+0 avvisi, 1 nota.
 
 ## 3. Compilare
 
@@ -198,7 +203,8 @@ stesso sorgente = stesso sha256 su ogni PC (`.gitattributes` forza LF). Mai `Com
 ## 4. Rilasciare
 
 1. Bump `<version>` in `yooarchive.xml`, voce in `CHANGELOG.md` e in `changelogs/yooarchive.xml`.
-2. Compila, ripassa JED Checker `master` e `develop` (zero errori e zero avvisi), collaudo nel
+2. Compila, ripassa JED Checker `master` e `develop` (zero errori e zero avvisi; unica nota
+   attesa quella su `<licence>`), collaudo nel
    Docker, prove di compatibilità se cambiano YOOtheme, Essentials o 4SEO.
 3. Copia lo zip in `dist/plg_system_yooarchive-X.Y.Z.zip`.
 4. Crea/aggiorna `updates/yooarchive.xml` copiando `updates/cfpurge.xml`: element `yooarchive`,

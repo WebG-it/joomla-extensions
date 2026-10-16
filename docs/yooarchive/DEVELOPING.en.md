@@ -47,7 +47,10 @@ differ and are SEF, a row is stored in `#__redirect_links` through the com_redir
 (301; an existing row with the same old URL is updated; a row starting from the new URL, now a
 live page again, is unpublished). The core *System - Redirect* plugin serves it on 404 pages;
 administrators are warned when it is off. 4SEO does not create redirects by itself when an
-article URL changes (checked with 4SEO 7.2.0).
+article URL changes (checked with 4SEO 7.2.0). Since 1.2.1 the plugin only updates or unpublishes
+rows whose note starts with `Automation::REDIRECT_MARKER`; an existing row for the same old URL
+without the marker is left alone (log line only). The log is rotated above 1 MB to
+`plg_system_yooarchive.1.php` (kept as .php for Joomla's `die()` guard).
 
 ## Test environment (Docker)
 
@@ -137,7 +140,8 @@ JED Checker (https://github.com/joomla-extensions/jedchecker) needs the *Behavio
 Compatibility 6* plugin on Joomla 6; switch it on only for the check. Run both branches: `master`
 (UI upload) and `develop` (`scripts/jedchecker_cli.php`). The `develop` rule PH3 wants a
 `<licence>` element mentioning GPL, which its own manifest validation then reports as an unknown
-element (notice): that single notice is expected.
+element (notice): that single notice is expected, in `master` too (0 errors, 0 warnings,
+1 notice).
 
 ## Build and release
 
