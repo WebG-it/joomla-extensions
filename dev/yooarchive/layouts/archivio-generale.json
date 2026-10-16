@@ -1,0 +1,67 @@
+{
+  "type": "layout",
+  "version": "5.0.51",
+  "children": [
+    {
+      "type": "section",
+      "props": { "style": "default", "width": "default", "vertical_align": "" },
+      "children": [
+        {
+          "type": "row",
+          "children": [
+            {
+              "type": "column",
+              "props": { "width_bp": "m" },
+              "children": [
+                {
+                  "type": "headline",
+                  "props": { "title_element": "h1", "content": "Archivio generale" },
+                  "source": { "query": { "name": "yooarchive" }, "props": { "content": { "name": "categories", "filters": { "before": "Generale: " } } } }
+                },
+                {
+                  "type": "text",
+                  "props": { "content": "" },
+                  "source": { "query": { "name": "yooarchive" }, "props": { "content": { "name": "total", "filters": { "before": "Articoli archiviati: " } } } }
+                },
+                {
+                  "type": "html",
+                  "props": { "content": "" },
+                  "source": { "query": { "name": "yooarchive" }, "props": { "content": { "name": "filterForm" } } }
+                },
+                {
+                  "type": "grid",
+                  "props": {
+                    "grid_default": "1", "grid_medium": "3", "panel_style": "card-default", "panel_card_image": true,
+                    "show_title": true, "show_meta": true, "show_content": true, "show_image": true, "show_link": true,
+                    "link_text": "Apri la scheda", "title_element": "h3", "meta_element": "div", "image_align": "top",
+                    "image_width": "600", "image_height": "400", "grid_column_gap": "", "grid_row_gap": ""
+                  },
+                  "children": [
+                    {
+                      "type": "grid_item",
+                      "props": {},
+                      "source": {
+                        "query": { "name": "yooarchiveArticles", "arguments": { "order": "title", "order_direction": "ASC" } },
+                        "props": {
+                          "title": { "name": "title" },
+                          "image": { "name": "images.image_intro" },
+                          "link": { "name": "link" },
+                          "meta": { "name": "field.comune.name" },
+                          "content": { "name": "field.prezzo" }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "pagination",
+                  "props": { "pagination_type": "numeric", "text_align": "center" }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Changelog feed Joomla per plg_system_yooarchive. Referenziato dal manifest via <changelogurl>. -->
+<changelogs>
+    <changelog>
+        <element>yooarchive</element>
+        <type>plugin</type>
+        <folder>system</folder>
+        <version>1.0.0</version>
+        <addition>
+            <item>YOOtheme Pro builder template type "Archived Articles" for the Joomla archive view, assignable by category (with child categories), page number and language.</item>
+            <item>Dynamic sources "Archived Articles", "Archived Article" and "Archive Information" (count, page, filtered month and year, search text, categories, filter form), with all article fields and custom fields.</item>
+            <item>Optional automation: archived articles are moved to a chosen category; a published article saved or batch-moved into that category is archived through the article model; "force archived" option.</item>
+            <item>en-GB and it-IT languages.</item>
+        </addition>
+    </changelog>
+</changelogs>

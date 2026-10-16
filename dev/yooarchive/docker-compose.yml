@@ -1,0 +1,45 @@
+# Local test environment for plg_system_yooarchive: Joomla 6.2 + PHP 8.4 + MariaDB 11.4.
+# Only for local development on localhost. All passwords here are dummy values.
+# See dev/yooarchive/README.md for setup, including where to get YOOtheme Pro
+# (proprietary, never committed to this repository).
+name: yooarchive-dev
+
+services:
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: joomla-dev
+      MARIADB_DATABASE: joomla
+      MARIADB_USER: joomla
+      MARIADB_PASSWORD: joomla-dev
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web:
+    # Official image used only for its PHP 8.4 + Apache runtime; Joomla 6.2.0 is
+    # extracted from the official release zip by scripts/entrypoint.sh.
+    image: joomla:6.1-php8.4-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["bash", "/dev-scripts/entrypoint.sh"]
+    environment:
+      DEV_SITE_URL: http://localhost:${DEV_PORT:-8765}
+    ports:
+      - "127.0.0.1:${DEV_PORT:-8765}:80"
+    volumes:
+      - site:/var/www/html
+      - ./scripts:/dev-scripts:ro
+      - ./layouts:/dev-layouts:ro
+      - ./.cache/joomla-6.2.0.zip:/joomla.zip:ro
+      - ${YOOTHEME_SRC:-./vendor-yootheme}:/yootheme:ro
+      - ../../build/out:/dist:ro
+
+volumes:
+  db:
+  site:

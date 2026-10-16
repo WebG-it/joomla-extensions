@@ -10,6 +10,9 @@ applicano con un click da **Sistema → Aggiorna**.
 ## Struttura
 
 ```
+plugins/<pacchetto>/        ← sorgente dei plugin (da yooarchive in poi)
+build/build_plugin.py       ← build riproducibile dello zip (python build/build_plugin.py plugins/<pacchetto>)
+dev/<plugin>/               ← ambiente Docker di collaudo (senza file proprietari di terzi)
 collection.xml              ← update server condiviso (questo URL va nel manifest di OGNI plugin)
 updates/<element>.xml       ← elenco versioni di un singolo plugin
 dist/<pacchetto>-X.Y.Z.zip  ← lo zip installabile
@@ -26,6 +29,7 @@ https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
 | Plugin | element | Tipo | Versione | Documentazione |
 |--------|---------|------|----------|----------------|
 | Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.4 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
+| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 1.0.0 (in revisione, non ancora pubblicato) | [Uso](./docs/yooarchive/USO.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) |
 
 ## Documentazione (due pubblici distinti)
 

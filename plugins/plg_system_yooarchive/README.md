@@ -1,0 +1,70 @@
+# Archive Layouts for YOOtheme (plg_system_yooarchive)
+
+Joomla system plugin by WebG. It adds to the YOOtheme Pro builder a template type for the
+Joomla archive view (`com_content` view `archive`, menu item type *Articles > Archived
+Articles*), plus an optional automation that keeps archived articles in one category.
+
+- Joomla 5.x and 6.x, PHP 8.1 or later, YOOtheme Pro 5 (tested on Joomla 6.2.0, PHP 8.4, YOOtheme Pro 5.0.51).
+- Nothing is written inside `templates/yootheme`: the plugin survives YOOtheme updates.
+- License: GNU GPL version 2 or later (see `LICENSE.txt`).
+
+## Builder template
+
+After installing (the plugin is enabled automatically) open YOOtheme Pro, *Builder >
+Templates > New template* and choose the page type **Archived Articles**. Assignment:
+
+| Field | Meaning |
+|---|---|
+| Limit by Categories | The archive menu item must be filtered on one of these categories (Joomla passes them as `catid[]`). Empty = every archive page. Child categories: exclude, include or only. |
+| Limit by Page Number | All pages, first page, all except the first. |
+| Limit by Language | As for the other YOOtheme templates (multilingual sites). |
+
+Dynamic content, group **Archive**:
+
+- **Archived Articles**: list of the archived articles of the current page, exposed as the
+  YOOtheme *Article* type, so every article field (title, images, link, dates, category,
+  author, tags, meta) and every custom field is available. Arguments: start, quantity, and an
+  optional re-sort of the current page (published, created, modified, title, hits, ordering, id).
+- **Archived Article**: one article of the current page.
+- **Archive Information**: article count, current page and page count, filtered year and
+  month, search text, categories of the menu item, and a ready-made **filter form** (HTML:
+  month, year, title search when enabled in the menu item, items per page).
+
+The YOOtheme **Pagination** element works on this template (the Joomla archive pagination
+is passed to the builder, filters included).
+
+The order across pages and the number of articles per page are those of the menu item
+(*Article Order*, *Date for Ordering*, *# Articles*), exactly as in Joomla. Month and year
+filters are the native ones (`?month=&year=`).
+
+Without a template assigned to a page, the archive is rendered by Joomla/YOOtheme as before.
+
+## Automation (off by default)
+
+In the plugin options, tab *Automation*:
+
+- **Archive category**: the category that holds the archived articles.
+- **Move archived articles**: an article archived from the list, the toolbar, the edit form or
+  the Web Services API is moved to the archive category.
+- **Archive articles moved into the category**: a published article saved into the archive
+  category, or moved there with *Batch*, is archived.
+- **Force archived** (off by default): when on, a published article in the archive category is
+  archived again even if it was republished on purpose.
+
+Archiving goes through the Joomla article model (`publish()`), so Smart Search, cache, action
+logs and the other plugins see a normal state change. Moves update the article asset and the
+Smart Search index. A guard prevents any recursion; failures are shown in the backend and
+logged in `administrator/logs/plg_system_yooarchive.php`.
+
+Limits: one archive category per site; the user needs the *Edit State* permission for the
+model to archive; not tested with Joomla *Workflows* enabled (the default is off).
+
+## Uninstall
+
+*System > Manage > Extensions*, select the plugin, *Uninstall*. The plugin keeps no tables and
+no files outside its folder. Builder templates of type *Archived Articles* stay in YOOtheme as
+"not assigned" and come back if the plugin is reinstalled.
+
+## Development
+
+Source, build script and Docker test environment: https://github.com/WebG-it/joomla-extensions

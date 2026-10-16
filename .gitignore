@@ -1,0 +1,10 @@
+# Local build output (release zips go to dist/ only when published)
+build/out/
+
+# Local development environments: downloaded Joomla, site files, proprietary
+# third-party code (YOOtheme Pro) and real .env files never go in this public repo.
+dev/**/.cache/
+dev/**/.env
+dev/**/vendor-*/
+dev/**/screenshots/
+__pycache__/
