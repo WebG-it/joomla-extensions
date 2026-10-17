@@ -49,7 +49,7 @@ Without a template assigned to a page, the archive is rendered by Joomla/YOOthem
 Up to 1.2.x this plugin also contained the archive automation. It is now **Auto Archive**
 (https://github.com/WebG-it/joomla-extensions/blob/main/docs/autoarchive/USAGE.md). With the
 automation **off** the update changes nothing. With the automation **on**, the update to 2.0 is
-refused with a clear message (nothing is changed) until Auto Archive is installed and enabled;
+refused with a clear message (nothing is changed) until Auto Archive is installed, enabled and switched on;
 Auto Archive imports the old settings and switches the old automation off when it is installed.
 
 ## Tested compatibility

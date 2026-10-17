@@ -25,4 +25,5 @@ S "S5 old ON, Auto Archive installed first with its automation OFF: 2.0.0 refuse
 S "S6 old ON, Auto Archive installed but disabled: refused; enabled and ON: accepted"; dcx php /dev-scripts/automation_on.php venduti autoarchive >/dev/null; sql "UPDATE jdev_extensions SET enabled=0 WHERE element='autoarchive'" >/dev/null; inst $Y2; state
 sql "UPDATE jdev_extensions SET enabled=1 WHERE element='autoarchive'" >/dev/null; inst $Y2; state
 S "S7 old ON but no category: update passes (nothing to carry over)"; clean; inst $Y121; sql "UPDATE jdev_extensions SET params=JSON_SET(params,'$.automation',1,'$.target_catid',0) WHERE element='yooarchive'" >/dev/null; inst $Y2; state
+S "S8 old ON but no category, then Auto Archive installed: message asks for the category"; clean; inst $Y121; sql "UPDATE jdev_extensions SET params=JSON_SET(params,'$.automation',1,'$.target_catid',0) WHERE element='yooarchive'" >/dev/null; inst $A1; state
 S "php error log"; dcx bash -c 'test -f administrator/logs/php-error.log && tail -3 administrator/logs/php-error.log || echo "(no php-error.log)"'

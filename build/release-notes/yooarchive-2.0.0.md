@@ -8,7 +8,7 @@ which also works without YOOtheme. Update from *System > Update > Extensions*.
 **If you never switched the automation on**: just update, nothing changes.
 
 **If the automation is on**: the update to 2.0.0 is refused with a clear message and nothing is
-changed, until Auto Archive 1.0.0 is installed and enabled. Install Auto Archive first: it
+changed, until Auto Archive 1.0.0 is installed, enabled and switched on. Install Auto Archive first: it
 imports your settings (category and options) and switches the old automation off so the two never
 run together; then update this plugin. The 301 redirects stored by 1.x stay in *System >
 Redirects* and are managed by Auto Archive.

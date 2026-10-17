@@ -16,7 +16,7 @@
         <downloads>
             <downloadurl type="full" format="zip">https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/dist/plg_system_yooarchive-2.0.0.zip</downloadurl>
         </downloads>
-        <sha256>02fc269d8eb45ca608a27e438fa9da1dd55cf9e21af2d0842fe1ed576e5fc770</sha256>
+        <sha256>46a6865c041f290c557b110f7dc43112404188625773ffb0319bf95b06c82e8c</sha256>
         <tags>
             <tag>stable</tag>
         </tags>

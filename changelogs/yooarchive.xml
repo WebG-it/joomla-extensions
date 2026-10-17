@@ -11,7 +11,7 @@
         </addition>
         <change>
             <item>The plugin does only the layout now. The archive automation (move archived articles to a category, archive what is placed there, force archived, 301 redirects) is the separate plugin Auto Archive 1.0.0, with the same behaviour; it also works without YOOtheme.</item>
-            <item>Safe update: if the automation was on and Auto Archive is not installed and enabled, the update is refused with a clear message and nothing is changed. Installing Auto Archive first imports the old settings and switches the old automation off.</item>
+            <item>Safe update: if the automation was on and Auto Archive is not installed, enabled and switched on, the update is refused with a clear message and nothing is changed. Installing Auto Archive first imports the old settings and switches the old automation off.</item>
         </change>
         <remove>
             <item>The automation and its options, messages and log.</item>

@@ -112,7 +112,7 @@ separato **Auto Archive**.
 
 - **Automazione spenta** (di serie): aggiorna e basta. Non cambia nulla.
 - **Automazione accesa**: l'aggiornamento alla 2.0 viene **rifiutato con un messaggio chiaro e
-  senza cambiare nulla** finché Auto Archive non è installato e attivo. Installa prima Auto
+  senza cambiare nulla** finché Auto Archive non è installato, attivo e acceso. Installa prima Auto
   Archive 1.0 (importa le tue impostazioni e spegne la vecchia automazione, così non gira due
   volte), poi aggiorna questo plugin. Se aggiorni per sbaglio resta installata e funzionante la
   versione vecchia.

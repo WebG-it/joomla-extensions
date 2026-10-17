@@ -118,7 +118,7 @@ category, archive what is placed there, 301 redirects). In 2.0 it is the separat
 
 - **Automation off** (the default): just update. Nothing changes.
 - **Automation on**: the update to 2.0 is **refused with a clear message and nothing is changed**
-  until Auto Archive is installed and enabled. Install Auto Archive 1.0 first (it imports your
+  until Auto Archive is installed, enabled and switched on. Install Auto Archive 1.0 first (it imports your
   settings and switches the old automation off so it never runs twice), then update this plugin.
   If you update by mistake the old version simply stays installed and working.
 

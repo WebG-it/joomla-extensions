@@ -8,7 +8,7 @@ Archive**.
 - Removed: the archive automation (move archived articles to a category, archive what is placed
   there, *Force archived*, 301 redirects, its options and its log). It is the plugin Auto Archive
   1.0.0, same behaviour, which also works without YOOtheme.
-- Safe update: when the automation was on and Auto Archive is not installed and enabled, the
+- Safe update: when the automation was on and Auto Archive is not installed, enabled and switched on, the
   update is refused with a clear message and nothing is changed. Installing Auto Archive first
   imports the old settings and switches the old automation off.
 - The files of the old automation are removed on update; the options screen explains where the
