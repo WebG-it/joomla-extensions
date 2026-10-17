@@ -2,10 +2,11 @@
 
 Joomla system plugin by WebG. It adds to the YOOtheme Pro builder a template type for the
 Joomla archive view (`com_content` view `archive`, menu item type *Articles > Archived
-Articles*), plus an optional automation that keeps archived articles in one category.
+Articles*). Since 2.0 it does only the layout: the optional automation that keeps archived
+articles in one category (up to 1.2.x part of this plugin) is the separate plugin **Auto Archive**.
 
 - Joomla 5.x and 6.x, PHP 8.1 or later, YOOtheme Pro 5 (with YOOtheme missing or older than
-  5.0 the builder part stays off and administrators are warned; the automation still works).
+  5.0 the builder part stays off and administrators are warned).
 - Tested on Joomla 6.2.0 and 5.4.10, PHP 8.4, YOOtheme Pro 5.0.51, together with Essentials for
   YOOtheme Pro 3.0.15 and 4SEO 7.2.0 (see *Tested compatibility* below).
 - Nothing is written inside `templates/yootheme`: the plugin survives YOOtheme updates.
@@ -43,46 +44,13 @@ filters are the native ones (`?month=&year=`).
 
 Without a template assigned to a page, the archive is rendered by Joomla/YOOtheme as before.
 
-## Automation (off by default)
+## Updating from 1.x
 
-In the plugin options, tab *Automation*:
-
-- **Archive category**: the category that holds the archived articles. If it is deleted or
-  trashed the automation pauses and the administrators see a warning. It must be published:
-  otherwise moved articles are not public and the administrators see a warning.
-- **Require create permission** (on by default): see *Permissions* below.
-- **Move archived articles**: an article archived from the list, the toolbar, the edit form or
-  the Web Services API is moved to the archive category.
-- **301 redirect from the old address** (on by default): when the category is part of the
-  article URL, entering the archive category changes the address; the old one is redirected
-  (301) to the new one with a record in the Joomla *Redirects* component (served by the core
-  *System - Redirect* plugin; administrators are warned if it is off). Applies to the moves made
-  by the plugin and to the published articles that a user moves into the archive category.
-- **Archive articles moved into the category**: a published article saved into the archive
-  category, or moved there with *Batch*, is archived.
-- **Force archived** (off by default): when on, a published article in the archive category is
-  archived again even if it was republished on purpose.
-
-Archiving goes through the Joomla article model (`publish()`), so Smart Search, cache, action
-logs and the other plugins see a normal state change, with the usual permission and check-out
-rules. Moves update the article asset and the Smart Search index. A guard prevents any recursion.
-
-**Redirects** are written by the plugin (no permission on the Redirects component is needed),
-only for the moves allowed below; an existing redirect for the same old address that the plugin
-did not create is never changed. The log is rotated above 1 MB (one previous file kept as `plg_system_yooarchive.1.php`).
-
-**Permissions.** An article is moved only when a logged-in user archives it and that user has
-*Edit State* on the article; with *Require create permission* on, the user also needs *Create*
-in the archive category. Articles being edited by another user (checked out) are skipped.
-Guests and the command line never move anything.
-
-**Messages.** The backend shows short, generic messages; ids and database errors go only to
-the log `administrator/logs/plg_system_yooarchive.php`. In the frontend (article editing) the
-messages are shown only to users who can manage articles.
-
-Limits: one archive category per site; moves ignore the article language (use a category with
-language *All* on multilingual sites); not tested with Joomla *Workflows* enabled (the
-default is off).
+Up to 1.2.x this plugin also contained the archive automation. It is now **Auto Archive**
+(https://github.com/WebG-it/joomla-extensions/blob/main/docs/autoarchive/USAGE.md). With the
+automation **off** the update changes nothing. With the automation **on**, the update to 2.0 is
+refused with a clear message (nothing is changed) until Auto Archive is installed and enabled;
+Auto Archive imports the old settings and switches the old automation off when it is installed.
 
 ## Tested compatibility
 
@@ -100,8 +68,8 @@ What was checked, on both Joomla versions:
 
 - **Install, update and uninstall** of this plugin with the other extensions active. Order 1:
   this plugin installed first, then 4SEO and Essentials. Order 2: this plugin uninstalled and
-  installed again with 4SEO and Essentials already active. Update from 1.1.0 to 1.2.0 and from
-  1.2.0 to 1.2.1 (through the update server). PHP error log and browser console empty.
+  installed again with 4SEO and Essentials already active. Update from 1.1.0 to 1.2.0, from
+  1.2.0 to 1.2.1 and from 1.2.1 to 2.0.0 (through the update server). PHP error log and browser console empty.
 - **YOOtheme Pro**: templates of the other page types (single article, category blog, featured
   articles, Smart Search) render the same HTML with this plugin on and off (only hit counters and
   random 4SEO probes differ). Customizer opening time and page response times are the same
@@ -116,21 +84,14 @@ What was checked, on both Joomla versions:
   (plugin off), also on numbered pages (`?start=`) and with month and year filters that have
   results (a filter with no results was not compared). The 4SEO site
   analysis follows the links of the template (articles and pagination). Sitemap with *Exclude
-  archived* on: archived articles are left out; off: they are listed with their new address
-  after the automation has moved them.
+  archived* on: archived articles are left out; off: they are listed.
 
 Not tested: the update of YOOtheme Pro to 5.0.52 with this plugin active (the package was not
 available), Joomla *Workflows*.
 
-**Notes for 4SEO users.** 4SEO does not create a redirect when an article changes URL. Keep the
-option *301 redirect from the old address* on (with the core *System - Redirect* plugin on) if
-the category is part of your article URLs. After archiving many articles at once, run a new
-site analysis in 4SEO (*Pages > Reset analysis*) so that sitemap and canonical tags use the new
-addresses. Numbered archive pages are treated by 4SEO like any other page.
-
-With article URLs that contain the id (`/<id>-alias`) Joomla finds the article by id whatever
-the category in the address, so the old URL stays live after the move (no 404) and the
-redirect is not used; 4SEO then keeps the old canonical until its next site analysis.
+**Notes for 4SEO users.** Numbered archive pages are treated by 4SEO like any other page. 4SEO
+does not create a redirect when an article changes URL: if you move articles into an archive
+category, Auto Archive stores the 301 redirects for the moves it makes.
 
 **Notes for Essentials users.** In the *Social Sharing* element leave the shared URL empty to
 share the current page: mapped to the article *Link* field it receives a non-SEF address, on the
@@ -140,9 +101,7 @@ archive template as on the YOOtheme article template (Essentials behaviour).
 
 *System > Manage > Extensions*, select the plugin, *Uninstall*. The plugin keeps no tables and
 no files outside its folder. Builder templates of type *Archived Articles* stay in YOOtheme as
-"not assigned" and come back if the plugin is reinstalled. The redirects stored by the
-automation stay in *System > Redirects* (note starting with "Archive Layouts for YOOtheme:")
-and the log stays in `administrator/logs/`.
+"not assigned" and come back if the plugin is reinstalled.
 
 ## Development
 

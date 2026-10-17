@@ -2,13 +2,13 @@
 
 /**
  * @package     WebG.Plugin
- * @subpackage  System.yooarchive
+ * @subpackage  System.autoarchive
  *
  * @copyright   (C) 2026 WebG di Marco Galassi <https://www.webg.it>
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace WebG\Plugin\System\Yooarchive\Automation;
+namespace WebG\Plugin\System\Autoarchive\Automation;
 
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
@@ -64,7 +64,14 @@ final class Automation
      * Marker at the start of the comment of every redirect stored by the plugin: only
      * redirects with this marker are ever changed by the plugin.
      */
-    public const REDIRECT_MARKER = 'Archive Layouts for YOOtheme:';
+    public const REDIRECT_MARKER = 'Auto Archive:';
+
+    /**
+     * Marker written by Archive Layouts for YOOtheme 1.2.x (the automation used to live
+     * there): redirects with this marker were created by this same automation and stay
+     * under its control after the migration.
+     */
+    public const LEGACY_REDIRECT_MARKER = 'Archive Layouts for YOOtheme:';
 
     /**
      * Size above which the plugin log is rotated (one previous file is kept).
@@ -74,7 +81,7 @@ final class Automation
     /**
      * Name of the plugin log file in the Joomla log folder.
      */
-    private const LOG_FILE = 'plg_system_yooarchive.php';
+    private const LOG_FILE = 'plg_system_autoarchive.php';
 
     /**
      * True while the plugin itself is changing articles: nested events are ignored.
@@ -113,7 +120,7 @@ final class Automation
      * user (save or batch), keyed by id: used for the redirect once it is archived.
      *
      * @var    array<int, string>
-     * @since  1.2.0
+     * @since  1.0.0
      */
     private array $oldUrls = [];
 
@@ -126,16 +133,16 @@ final class Automation
     public function __construct(private Registry $params, private CMSApplicationInterface $app)
     {
         self::rotateLog();
-        Log::addLogger(['text_file' => self::LOG_FILE], Log::ALL, ['yooarchive']);
+        Log::addLogger(['text_file' => self::LOG_FILE], Log::ALL, ['autoarchive']);
     }
 
     /**
      * Keeps the plugin log small: above 1 MB the file is renamed to
-     * plg_system_yooarchive.1.php (replacing the previous one) and Joomla starts a new file.
+     * plg_system_autoarchive.1.php (replacing the previous one) and Joomla starts a new file.
      *
      * @return  void
      *
-     * @since   1.2.1
+     * @since   1.0.0
      */
     private static function rotateLog(): void
     {
@@ -346,14 +353,14 @@ final class Automation
             $requested = $pks;
 
             if (!$model->publish($pks, self::STATE_ARCHIVED)) {
-                $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $requested) . ': ' . $model->getError());
+                $this->warn('PLG_SYSTEM_AUTOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $requested) . ': ' . $model->getError());
 
                 return;
             }
 
             if ($pks) {
-                $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVED_N', \count($pks)));
-                Log::add('Archived articles ' . implode(',', $pks), Log::INFO, 'yooarchive');
+                $this->notice(Text::plural('PLG_SYSTEM_AUTOARCHIVE_MSG_ARCHIVED_N', \count($pks)));
+                Log::add('Archived articles ' . implode(',', $pks), Log::INFO, 'autoarchive');
             }
 
             // Articles moved into the archive category by the user: redirect the old address.
@@ -369,10 +376,10 @@ final class Automation
             }
 
             if ($redirects) {
-                $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_REDIRECTS_N', $redirects));
+                $this->notice(Text::plural('PLG_SYSTEM_AUTOARCHIVE_MSG_REDIRECTS_N', $redirects));
             }
         } catch (\Throwable $e) {
-            $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
+            $this->warn('PLG_SYSTEM_AUTOARCHIVE_MSG_ARCHIVE_FAILED', 'Archive failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
         } finally {
             self::$busy = false;
         }
@@ -400,14 +407,14 @@ final class Automation
 
         // Only a logged-in user can trigger a move: never guests, never the command line.
         if ($this->app->isClient('cli') || !$user || $user->guest || !$user->id) {
-            Log::add('Move skipped for articles ' . implode(',', $pks) . ': no logged-in user', Log::WARNING, 'yooarchive');
+            Log::add('Move skipped for articles ' . implode(',', $pks) . ': no logged-in user', Log::WARNING, 'autoarchive');
 
             return;
         }
 
         if ($this->params->get('require_create', 1) && !$user->authorise('core.create', 'com_content.category.' . $target)) {
             $this->warn(
-                'PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_SKIPPED',
+                'PLG_SYSTEM_AUTOARCHIVE_MSG_MOVE_SKIPPED',
                 'Move skipped for articles ' . implode(',', $pks) . ': user ' . $user->id . ' cannot create in category ' . $target
             );
 
@@ -448,7 +455,7 @@ final class Automation
                 $table->catid = $target;
 
                 if (!$table->check() || !$table->store()) {
-                    $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', 'Move failed for article ' . $pk . ': ' . $table->getError());
+                    $this->warn('PLG_SYSTEM_AUTOARCHIVE_MSG_MOVE_FAILED', 'Move failed for article ' . $pk . ': ' . $table->getError());
                     continue;
                 }
 
@@ -462,12 +469,12 @@ final class Automation
 
             if ($moved) {
                 $this->cleanCache();
-                $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_MOVED_N', \count($moved)));
-                Log::add('Moved articles ' . implode(',', $moved) . ' to category ' . $target, Log::INFO, 'yooarchive');
+                $this->notice(Text::plural('PLG_SYSTEM_AUTOARCHIVE_MSG_MOVED_N', \count($moved)));
+                Log::add('Moved articles ' . implode(',', $moved) . ' to category ' . $target, Log::INFO, 'autoarchive');
             }
 
             if ($redirects) {
-                $this->notice(Text::plural('PLG_SYSTEM_YOOARCHIVE_MSG_REDIRECTS_N', $redirects));
+                $this->notice(Text::plural('PLG_SYSTEM_AUTOARCHIVE_MSG_REDIRECTS_N', $redirects));
             }
 
             if ($skipped) {
@@ -477,10 +484,10 @@ final class Automation
                     $detail[] = $pk . ' (' . $reason . ')';
                 }
 
-                $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_SKIPPED', 'Move skipped for articles ' . implode(', ', $detail));
+                $this->warn('PLG_SYSTEM_AUTOARCHIVE_MSG_MOVE_SKIPPED', 'Move skipped for articles ' . implode(', ', $detail));
             }
         } catch (\Throwable $e) {
-            $this->warn('PLG_SYSTEM_YOOARCHIVE_MSG_MOVE_FAILED', 'Move failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
+            $this->warn('PLG_SYSTEM_AUTOARCHIVE_MSG_MOVE_FAILED', 'Move failed for articles ' . implode(',', $pks) . ': ' . $e->getMessage());
         } finally {
             self::$busy = false;
         }
@@ -497,14 +504,14 @@ final class Automation
      *
      * @return  string
      *
-     * @since   1.2.0
+     * @since   1.0.0
      */
     private function siteUrl(int $id, int $catid, string $language): string
     {
         try {
             $url = (string) Route::link('site', RouteHelper::getArticleRoute($id, $catid, $language), false);
         } catch (\Throwable $e) {
-            Log::add('URL of article ' . $id . ' not built: ' . $e->getMessage(), Log::WARNING, 'yooarchive');
+            Log::add('URL of article ' . $id . ' not built: ' . $e->getMessage(), Log::WARNING, 'autoarchive');
 
             return '';
         }
@@ -525,7 +532,7 @@ final class Automation
      *
      * @return  bool  True when a redirect has been stored.
      *
-     * @since   1.2.0
+     * @since   1.0.0
      */
     private function addRedirect(int $id, string $oldUrl, string $newUrl): bool
     {
@@ -536,14 +543,16 @@ final class Automation
         try {
             $db     = Factory::getContainer()->get(DatabaseInterface::class);
             $marker = self::REDIRECT_MARKER . '%';
+            $legacy = self::LEGACY_REDIRECT_MARKER . '%';
             $query  = $db->createQuery()
                 ->update($db->quoteName('#__redirect_links'))
                 ->set($db->quoteName('published') . ' = 0')
                 ->where($db->quoteName('old_url') . ' = :new')
                 ->where($db->quoteName('published') . ' = 1')
-                ->where($db->quoteName('comment') . ' LIKE :marker')
+                ->where('(' . $db->quoteName('comment') . ' LIKE :marker OR ' . $db->quoteName('comment') . ' LIKE :legacy)')
                 ->bind(':new', $newUrl)
-                ->bind(':marker', $marker);
+                ->bind(':marker', $marker)
+                ->bind(':legacy', $legacy);
             $db->setQuery($query)->execute();
 
             $table = $this->app->bootComponent('com_redirect')->getMVCFactory()->createTable('Link', 'Administrator');
@@ -554,8 +563,8 @@ final class Automation
 
             // A redirect for the same old address that the plugin did not create (made by
             // hand or by another extension) is never touched.
-            if ($table->load(['old_url' => $oldUrl]) && !str_starts_with((string) $table->comment, self::REDIRECT_MARKER)) {
-                Log::add('Redirect for article ' . $id . ' not stored: a redirect not created by the plugin already exists for ' . $oldUrl, Log::INFO, 'yooarchive');
+            if ($table->load(['old_url' => $oldUrl]) && !$this->isOwnRedirect((string) $table->comment)) {
+                Log::add('Redirect for article ' . $id . ' not stored: a redirect not created by the plugin already exists for ' . $oldUrl, Log::INFO, 'autoarchive');
 
                 return false;
             }
@@ -573,19 +582,33 @@ final class Automation
             ]);
 
             if (!$table->check() || !$table->store()) {
-                Log::add('Redirect for article ' . $id . ' not stored: ' . $table->getError(), Log::WARNING, 'yooarchive');
+                Log::add('Redirect for article ' . $id . ' not stored: ' . $table->getError(), Log::WARNING, 'autoarchive');
 
                 return false;
             }
 
-            Log::add('Redirect 301 ' . $oldUrl . ' -> ' . $newUrl . ' (article ' . $id . ')', Log::INFO, 'yooarchive');
+            Log::add('Redirect 301 ' . $oldUrl . ' -> ' . $newUrl . ' (article ' . $id . ')', Log::INFO, 'autoarchive');
 
             return true;
         } catch (\Throwable $e) {
-            Log::add('Redirect for article ' . $id . ' not stored: ' . $e->getMessage(), Log::WARNING, 'yooarchive');
+            Log::add('Redirect for article ' . $id . ' not stored: ' . $e->getMessage(), Log::WARNING, 'autoarchive');
 
             return false;
         }
+    }
+
+    /**
+     * Whether a redirect note was written by this automation (current or legacy marker).
+     *
+     * @param   string  $comment  The note of the redirect.
+     *
+     * @return  bool
+     *
+     * @since   1.0.0
+     */
+    private function isOwnRedirect(string $comment): bool
+    {
+        return str_starts_with($comment, self::REDIRECT_MARKER) || str_starts_with($comment, self::LEGACY_REDIRECT_MARKER);
     }
 
     /**
@@ -639,7 +662,7 @@ final class Automation
      *
      * @return  string  The language of the article ('*' when unknown).
      *
-     * @since   1.2.0
+     * @since   1.0.0
      */
     private function getLanguage(int $id): string
     {
@@ -671,7 +694,7 @@ final class Automation
      *
      * @return  bool
      *
-     * @since   1.1.0
+     * @since   1.0.0
      */
     public static function isValidTarget(int $catid): bool
     {
@@ -688,7 +711,7 @@ final class Automation
      *
      * @return  int|null
      *
-     * @since   1.1.0
+     * @since   1.0.0
      */
     public static function getTargetState(int $catid): ?int
     {
@@ -729,7 +752,7 @@ final class Automation
                 ->createCacheController('callback', ['defaultgroup' => 'com_content'])
                 ->clean();
         } catch (\Throwable $e) {
-            Log::add('Cache clean failed: ' . $e->getMessage(), Log::WARNING, 'yooarchive');
+            Log::add('Cache clean failed: ' . $e->getMessage(), Log::WARNING, 'autoarchive');
         }
     }
 
@@ -759,11 +782,11 @@ final class Automation
      *
      * @return  void
      *
-     * @since   1.1.0
+     * @since   1.0.0
      */
     private function warn(string $languageKey, string $detail): void
     {
-        Log::add($detail, Log::WARNING, 'yooarchive');
+        Log::add($detail, Log::WARNING, 'autoarchive');
 
         $user = $this->app->getIdentity();
         $show = $this->app->isClient('administrator')

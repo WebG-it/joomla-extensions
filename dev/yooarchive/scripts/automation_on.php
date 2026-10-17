@@ -5,11 +5,14 @@
  * as the plugin options screen would do.
  *   php /dev-scripts/automation_on.php venduti     (on, target "venduti")
  *   php /dev-scripts/automation_on.php off
+ * A second argument chooses the plugin that holds the settings: yooarchive (1.x, default)
+ * or autoarchive (Auto Archive).   php /dev-scripts/automation_on.php venduti autoarchive
  */
 
 $db    = new mysqli('db', 'joomla', (string) getenv('DEV_DB_PASSWORD'), 'joomla');
 $arg   = $argv[1] ?? 'venduti';
-$row   = $db->query("SELECT extension_id, params FROM jdev_extensions WHERE element='yooarchive' AND folder='system'")->fetch_assoc();
+$elem  = in_array($argv[2] ?? '', ['yooarchive', 'autoarchive'], true) ? $argv[2] : 'yooarchive';
+$row   = $db->query("SELECT extension_id, params FROM jdev_extensions WHERE element='$elem' AND folder='system'")->fetch_assoc();
 $p     = json_decode($row['params'] ?: '{}', true) ?: [];
 
 if ($arg === 'off') {

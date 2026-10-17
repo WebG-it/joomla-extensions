@@ -6,7 +6,8 @@ Extensions*.
 
 | Extension | Type | Version | Docs |
 |---|---|---|---|
-| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 1.2.1 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
+| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 2.0.0 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
+| [Auto Archive](#auto-archive) | plugin / system | 1.0.0 | [User guide](./docs/autoarchive/USAGE.md) · [Guida (IT)](./docs/autoarchive/USO.md) |
 | Cloudflare Cache Purge | plugin / content | 1.1.4 | [Uso (IT)](./docs/USO.md) |
 
 Support: [GitHub issues](https://github.com/WebG-it/joomla-extensions/issues) (write your
@@ -17,7 +18,7 @@ Joomla, PHP and template versions; never post passwords, keys or private data).
 ## Archive Layouts for YOOtheme
 
 Design the Joomla **Archived Articles** page with the **YOOtheme Pro builder**, like category
-and featured pages, and optionally keep archived articles in one category automatically.
+and featured pages.
 
 ![Archive page built with the YOOtheme Pro builder (test data)](./docs/yooarchive/images/frontend-grid.jpg)
 
@@ -28,28 +29,54 @@ and featured pages, and optionally keep archived articles in one category automa
 - Dynamic content group **Archive**: the archived articles of the page with every article
   field and **all custom fields**, a single article, and archive information (count, page,
   filtered month and year, ready-made filter form). Works with the YOOtheme Pagination element.
-- Optional automation: *Archive* moves the article to a chosen category; a published article
-  saved or batch-moved into that category is archived through the Joomla model (Smart Search,
-  cache and versions stay in sync). Permission-aware, off by default. When an article changes
-  URL a 301 redirect from the old address is stored in Joomla Redirects.
+- Since 2.0 it does only the layout. The archive automation that was part of 1.x is the separate
+  plugin [Auto Archive](#auto-archive) (see *Updating from 1.x* in the
+  [user guide](./docs/yooarchive/USAGE.md#updating-from-1x)).
 - Survives YOOtheme updates (nothing is written in the template folder). English and Italian.
 
 **Requirements**: Joomla 5 or 6, PHP 8.1+, YOOtheme Pro 5. Tested on Joomla 6.2.0 and 5.4.10,
 PHP 8.4, YOOtheme Pro 5.0.51, together with Essentials for YOOtheme Pro 3.0.15 and 4SEO 7.2.0
 ([tested compatibility](./docs/yooarchive/USAGE.md#tested-compatibility)).
 
-**Install**: download `plg_system_yooarchive-1.2.1.zip` from the
+**Install**: download `plg_system_yooarchive-2.0.0.zip` from the
 [releases](https://github.com/WebG-it/joomla-extensions/releases) (or [dist/](./dist)), then
 *System > Install > Extensions > Upload Package File*. Full guide: [USAGE.md](./docs/yooarchive/USAGE.md).
 
 **Updates**: automatic through the WebG update server, in *System > Update > Extensions*.
 
-| Builder: dynamic source | Builder: custom fields | Automation options |
-|---|---|---|
-| ![](./docs/yooarchive/images/builder-source.jpg) | ![](./docs/yooarchive/images/builder-fields.jpg) | ![](./docs/yooarchive/images/automation-options.jpg) |
+| Builder: dynamic source | Builder: custom fields |
+|---|---|
+| ![](./docs/yooarchive/images/builder-source.jpg) | ![](./docs/yooarchive/images/builder-fields.jpg) |
 
 License: GNU GPL v2 or later. YOOtheme Pro is a separate commercial product of YOOtheme GmbH and
 is not included.
+
+---
+
+## Auto Archive
+
+Keep the **archived articles of a Joomla site in one category**, automatically. Plain Joomla: it
+works with or without YOOtheme.
+
+![Auto Archive options](./docs/autoarchive/images/options.jpg)
+
+- **Archive** an article (list, toolbar, edit form or API) and it is moved to the category you choose.
+- Save a published article into that category, or move it there with **Batch**, and it is archived
+  through the Joomla article model (Smart Search, cache, versions and action logs stay in sync).
+- Optional **301 redirect** from the old address when the category is part of the article URL.
+- Off by default, permission-aware, never acts for guests or the command line. English and Italian.
+
+**Requirements**: Joomla 5 or 6, PHP 8.1+. Tested on Joomla 6.2.0 and 5.4.10, PHP 8.4, also with
+YOOtheme Pro 5.0.51, Essentials for YOOtheme Pro 3.0.15 and 4SEO 7.2.0 active.
+
+**Install**: download `plg_system_autoarchive-1.0.0.zip` from the
+[releases](https://github.com/WebG-it/joomla-extensions/releases) (or [dist/](./dist)), then
+*System > Install > Extensions > Upload Package File*. Full guide: [USAGE.md](./docs/autoarchive/USAGE.md).
+Coming from Archive Layouts for YOOtheme 1.x: Auto Archive imports the automation settings.
+
+**Updates**: automatic through the WebG update server, in *System > Update > Extensions*.
+
+License: GNU GPL v2 or later.
 
 ---
 
@@ -85,7 +112,8 @@ https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
 | Plugin | element | Tipo | Versione | Documentazione |
 |--------|---------|------|----------|----------------|
 | Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.4 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
-| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 1.2.1 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
+| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 2.0.0 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
+| Auto Archive | `autoarchive` | plugin / system | 1.0.0 | [Uso](./docs/autoarchive/USO.md) · [Usage (EN)](./docs/autoarchive/USAGE.md) · [Sviluppo](./docs/autoarchive/DEVELOPING.md) · [Developing (EN)](./docs/autoarchive/DEVELOPING.en.md) |
 
 ## Documentazione (due pubblici distinti)
 

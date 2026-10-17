@@ -14,7 +14,6 @@ plugins/plg_system_yooarchive/
   services/provider.php         Joomla 5/6 service provider
   bootstrap.php                 YOOtheme module loaded with Application::load()
   src/Extension/Yooarchive.php  plugin (SubscriberInterface)
-  src/Automation/Automation.php archive/category automation
   src/YOOtheme/...              builder integration
   language/{en-GB,it-IT}/
 ```
@@ -30,27 +29,11 @@ Joomla prepares archive items with the `com_content.archive` context, which com_
 map to `article`, so `jcfields` is empty; `ArchiveQueryType::prepareItems()` drops the empty list
 and YOOtheme reloads the fields with `com_content.article`.
 
-Automation: `onTableBeforeStore` remembers category and state; `onTableAfterStore` queues an
-archive or a move; `onContentChangeState` handles list/toolbar/API state changes; the queue runs
-on `onContentAfterSave` / `onContentCleanCache`. Archive = `ArticleModel::publish($pks, 2)`;
-move = `Table::store()` with the new `catid` plus `onFinderAfterSave`. Moves need a logged-in user
-with `core.edit.state` on the article (and `core.create` on the target category when *Require
-create permission* is on), skip articles checked out by others, never run for guests or CLI.
-Screen messages are generic language strings; details go to `Log::add()` only. A static `$busy`
-flag prevents recursion. An invalid (missing or trashed) archive category pauses the automation.
-
-Redirects (option *301 redirect from the old address*, since 1.2.0): the public URL is built with
-`Route::link('site', RouteHelper::getArticleRoute(id, catid, language))` before and after the
-category change (in `move()` for the plugin's own moves, in `onTableBeforeStore` for a published
-article a user brings into the category, with the stored category and alias). When the URLs
-differ and are SEF, a row is stored in `#__redirect_links` through the com_redirect `Link` table
-(301; an existing row with the same old URL is updated; a row starting from the new URL, now a
-live page again, is unpublished). The core *System - Redirect* plugin serves it on 404 pages;
-administrators are warned when it is off. 4SEO does not create redirects by itself when an
-article URL changes (checked with 4SEO 7.2.0). Since 1.2.1 the plugin only updates or unpublishes
-rows whose note starts with `Automation::REDIRECT_MARKER`; an existing row for the same old URL
-without the marker is left alone (log line only). The log is rotated above 1 MB to
-`plg_system_yooarchive.1.php` (kept as .php for Joomla's `die()` guard).
+Automation: no longer in this plugin. Up to 1.2 it was `src/Automation/Automation.php`; since 2.0
+it is the separate plugin `plg_system_autoarchive` ([guide](../autoarchive/DEVELOPING.en.md)). The
+`script.php` of this plugin has a `preflight` that refuses an update from 1.x when the automation
+is on and Auto Archive is missing or disabled (nothing changes), and removes the old automation
+files after an update.
 
 ## Test environment (Docker)
 

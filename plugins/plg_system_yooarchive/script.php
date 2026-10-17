@@ -17,10 +17,12 @@ use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Installer\InstallerScript;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
+use Joomla\Registry\Registry;
 
 /**
  * Installation script: checks PHP and Joomla versions, enables the plugin on the
- * first install and warns when YOOtheme Pro is not installed.
+ * first install, warns when YOOtheme Pro is not installed and, on an update from 1.x,
+ * stops the update while the archive automation is on and Auto Archive is not installed.
  *
  * @since  1.0.0
  */
@@ -37,6 +39,87 @@ class PlgSystemYooarchiveInstallerScript extends InstallerScript
      * @since  1.0.0
      */
     protected $minimumJoomla = '5.0.0';
+
+    /**
+     * Files of the 1.x automation that Joomla does not remove on update.
+     *
+     * @var    string[]
+     * @since  2.0.0
+     */
+    protected $deleteFiles = ['/plugins/system/yooarchive/src/Automation/Automation.php'];
+
+    /**
+     * @var    string[]
+     * @since  2.0.0
+     */
+    protected $deleteFolders = ['/plugins/system/yooarchive/src/Automation'];
+
+    /**
+     * Version 2.0.0 no longer contains the archive automation (it is the separate plugin
+     * Auto Archive). A site that has the automation switched on would silently lose it, so the
+     * update is refused, with nothing changed, until Auto Archive is installed and enabled:
+     * Auto Archive imports the old settings when it is installed.
+     *
+     * @param   string            $type    install, update or discover_install.
+     * @param   InstallerAdapter  $parent  The installer adapter.
+     *
+     * @return  boolean
+     *
+     * @since   2.0.0
+     */
+    public function preflight($type, $parent)
+    {
+        if (!parent::preflight($type, $parent)) {
+            return false;
+        }
+
+        if ($type !== 'update') {
+            return true;
+        }
+
+        $db  = Factory::getContainer()->get(DatabaseInterface::class);
+        $old = $this->getPlugin($db, 'yooarchive');
+
+        if (!$old || !(int) (new Registry($old->params ?: '{}'))->get('automation', 0)) {
+            return true;
+        }
+
+        $new = $this->getPlugin($db, 'autoarchive');
+
+        if ($new && (int) $new->enabled === 1) {
+            return true;
+        }
+
+        $app  = Factory::getApplication();
+        $path = $parent->getParent()->getPath('source');
+
+        // The new language files are still in the package folder at this point.
+        $app->getLanguage()->load('plg_system_yooarchive.sys', $path);
+        $app->enqueueMessage(Text::_('PLG_SYSTEM_YOOARCHIVE_UPDATE_BLOCKED'), 'error');
+
+        return false;
+    }
+
+    /**
+     * @param   DatabaseInterface  $db       The database.
+     * @param   string             $element  The system plugin element.
+     *
+     * @return  object|null  params and enabled flag of the plugin, or null when not installed.
+     *
+     * @since   2.0.0
+     */
+    private function getPlugin(DatabaseInterface $db, string $element): ?object
+    {
+        $query = $db->createQuery()
+            ->select($db->quoteName(['params', 'enabled']))
+            ->from($db->quoteName('#__extensions'))
+            ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
+            ->where($db->quoteName('folder') . ' = ' . $db->quote('system'))
+            ->where($db->quoteName('element') . ' = :element')
+            ->bind(':element', $element);
+
+        return $db->setQuery($query)->loadObject() ?: null;
+    }
 
     /**
      * @param   string            $type    install, update or discover_install.
@@ -66,6 +149,31 @@ class PlgSystemYooarchiveInstallerScript extends InstallerScript
             $app->enqueueMessage(Text::_('PLG_SYSTEM_YOOARCHIVE_INSTALL_NO_YOOTHEME'), 'warning');
         }
 
+        if ($type === 'update') {
+            $this->removeFiles();
+        }
+
+        if ($type === 'update' && $this->hasOldAutomationSettings()) {
+            $app->enqueueMessage(Text::_('PLG_SYSTEM_YOOARCHIVE_UPDATE_AUTOMATION_MOVED'), 'info');
+        }
+
         return true;
+    }
+
+    /**
+     * Whether Auto Archive is installed and this plugin still holds settings from the
+     * 1.x automation: they are no longer used here.
+     *
+     * @return  bool
+     *
+     * @since   2.0.0
+     */
+    private function hasOldAutomationSettings(): bool
+    {
+        $db  = Factory::getContainer()->get(DatabaseInterface::class);
+        $old = $this->getPlugin($db, 'yooarchive');
+
+        return $old && (int) (new Registry($old->params ?: '{}'))->get('target_catid', 0) > 0
+            && $this->getPlugin($db, 'autoarchive') !== null;
     }
 }
