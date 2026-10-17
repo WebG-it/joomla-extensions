@@ -19,6 +19,13 @@
         element="yooarchive"
         type="plugin"
         folder="system"
-        version="1.2.1"
+        version="2.0.0"
         detailsurl="https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/updates/yooarchive.xml" />
+    <extension
+        name="Auto Archive"
+        element="autoarchive"
+        type="plugin"
+        folder="system"
+        version="1.0.0"
+        detailsurl="https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/updates/autoarchive.xml" />
 </extensionset>

@@ -3,20 +3,20 @@
 <updates>
     <update>
         <name>Archive Layouts for YOOtheme</name>
-        <description>YOOtheme Pro builder template for the Joomla archive view (Archived Articles), with optional archive automation.</description>
+        <description>YOOtheme Pro builder template for the Joomla archive view (Archived Articles). The archive automation is the separate plugin Auto Archive.</description>
         <element>yooarchive</element>
         <type>plugin</type>
         <folder>system</folder>
         <client>site</client>
-        <version>1.2.1</version>
+        <version>2.0.0</version>
         <maintainer>Marco Galassi (WebG)</maintainer>
         <maintainerurl>https://www.webg.it</maintainerurl>
         <infourl title="Archive Layouts for YOOtheme">https://github.com/WebG-it/joomla-extensions/blob/main/docs/yooarchive/USAGE.md</infourl>
         <changelogurl>https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/changelogs/yooarchive.xml</changelogurl>
         <downloads>
-            <downloadurl type="full" format="zip">https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/dist/plg_system_yooarchive-1.2.1.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/dist/plg_system_yooarchive-2.0.0.zip</downloadurl>
         </downloads>
-        <sha256>2ec106d1d15de4dc3c735ab86cc8b61ed9abae6378933890d40dcad63270bb5a</sha256>
+        <sha256>02fc269d8eb45ca608a27e438fa9da1dd55cf9e21af2d0842fe1ed576e5fc770</sha256>
         <tags>
             <tag>stable</tag>
         </tags>

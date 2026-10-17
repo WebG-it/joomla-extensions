@@ -58,8 +58,6 @@ is not included.
 Keep the **archived articles of a Joomla site in one category**, automatically. Plain Joomla: it
 works with or without YOOtheme.
 
-![Auto Archive options](./docs/autoarchive/images/options.jpg)
-
 - **Archive** an article (list, toolbar, edit form or API) and it is moved to the category you choose.
 - Save a published article into that category, or move it there with **Batch**, and it is archived
   through the Joomla article model (Smart Search, cache, versions and action logs stay in sync).

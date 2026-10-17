@@ -80,13 +80,22 @@ class PlgSystemYooarchiveInstallerScript extends InstallerScript
         $db  = Factory::getContainer()->get(DatabaseInterface::class);
         $old = $this->getPlugin($db, 'yooarchive');
 
-        if (!$old || !(int) (new Registry($old->params ?: '{}'))->get('automation', 0)) {
+        // Only an update from 1.x matters: 2.0 and later hold no automation.
+        if (!$old || !$this->isLegacy($old)) {
+            return true;
+        }
+
+        $oldParams = $this->params($old);
+
+        // Nothing to carry over when the automation is off or has no category.
+        if (!(int) $oldParams->get('automation', 0) || (int) $oldParams->get('target_catid', 0) <= 0) {
             return true;
         }
 
         $new = $this->getPlugin($db, 'autoarchive');
 
-        if ($new && (int) $new->enabled === 1) {
+        // Auto Archive must be there, enabled and with its automation switched on.
+        if ($new && (int) $new->enabled === 1 && (int) $this->params($new)->get('automation', 0) === 1) {
             return true;
         }
 
@@ -101,6 +110,40 @@ class PlgSystemYooarchiveInstallerScript extends InstallerScript
     }
 
     /**
+     * @param   object  $plugin  A row from getPlugin().
+     *
+     * @return  Registry  The parameters (empty when the stored JSON is not valid).
+     *
+     * @since   2.0.0
+     */
+    private function params(object $plugin): Registry
+    {
+        try {
+            return new Registry($plugin->params ?: '{}');
+        } catch (\Throwable $e) {
+            return new Registry();
+        }
+    }
+
+    /**
+     * @param   object  $plugin  A row from getPlugin().
+     *
+     * @return  bool  True when the installed version is older than 2.0.0.
+     *
+     * @since   2.0.0
+     */
+    private function isLegacy(object $plugin): bool
+    {
+        try {
+            $version = (string) (new Registry($plugin->manifest_cache ?: '{}'))->get('version', '');
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return $version !== '' && version_compare($version, '2.0.0', '<');
+    }
+
+    /**
      * @param   DatabaseInterface  $db       The database.
      * @param   string             $element  The system plugin element.
      *
@@ -111,7 +154,7 @@ class PlgSystemYooarchiveInstallerScript extends InstallerScript
     private function getPlugin(DatabaseInterface $db, string $element): ?object
     {
         $query = $db->createQuery()
-            ->select($db->quoteName(['params', 'enabled']))
+            ->select($db->quoteName(['params', 'enabled', 'manifest_cache']))
             ->from($db->quoteName('#__extensions'))
             ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
             ->where($db->quoteName('folder') . ' = ' . $db->quote('system'))
@@ -173,7 +216,7 @@ class PlgSystemYooarchiveInstallerScript extends InstallerScript
         $db  = Factory::getContainer()->get(DatabaseInterface::class);
         $old = $this->getPlugin($db, 'yooarchive');
 
-        return $old && (int) (new Registry($old->params ?: '{}'))->get('target_catid', 0) > 0
+        return $old && (int) $this->params($old)->get('target_catid', 0) > 0
             && $this->getPlugin($db, 'autoarchive') !== null;
     }
 }
