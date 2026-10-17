@@ -26,6 +26,6 @@
         element="autoarchive"
         type="plugin"
         folder="system"
-        version="1.0.0"
+        version="1.0.1"
         detailsurl="https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/updates/autoarchive.xml" />
 </extensionset>
