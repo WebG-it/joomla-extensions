@@ -9,7 +9,7 @@ sites installed before the split.
 |---|---|---|---|
 | Archive Layouts for YOOtheme | plugin / system | 2.0.1 | [WebG-it/archive-layouts](https://github.com/WebG-it/archive-layouts) |
 | Auto Archive | plugin / system | 1.1.0 | [WebG-it/auto-archive](https://github.com/WebG-it/auto-archive) |
-| Cloudflare Cache Purge | package (plugins, module, API) | 2.1.0 | [WebG-it/cloudflare-cache-purge](https://github.com/WebG-it/cloudflare-cache-purge) |
+| Cloudflare Cache Purge | package (plugins, module, API) | 2.1.1 | [WebG-it/cloudflare-cache-purge](https://github.com/WebG-it/cloudflare-cache-purge) |
 
 Shared tools for developing and testing them (Docker test sites for Joomla 5 and 6, JED Checker
 helpers, reproducible zip build): [WebG-it/joomla-dev-tools](https://github.com/WebG-it/joomla-dev-tools).
@@ -31,7 +31,7 @@ servers.
 
 The versions released before the split (Archive Layouts 2.0.0 and earlier, Auto Archive 1.0.1, Cloudflare
 Cache Purge 1.1.4 and earlier) check `https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml`. That
-address keeps working: it announces Archive Layouts 2.0.1 (a patch that changes only the update address), Auto Archive 1.1.0 and Cloudflare Cache Purge 2.1.0. In *System > Update >
+address keeps working: it announces Archive Layouts 2.0.1 (a patch that changes only the update address), Auto Archive 1.1.0 and Cloudflare Cache Purge 2.1.1. In *System > Update >
 Extensions* install the update: the patch changes nothing but the update address, and from then on the
 extension checks its own repository. Auto Archive and Cloudflare Cache Purge are not installed on any
 known site: their releases from 1.1.0 and 2.1.0 on already declare their own repository, and the old 1.x versions

@@ -3,7 +3,7 @@
   WebG Joomla Extensions - catalog / legacy collection update server.
   Each WebG plugin now lives in its own repository and has its own update server (see README.md).
   This collection stays at its old address only so that sites installed before the split find the
-  patch release (yooarchive 2.0.1), the new Auto Archive 1.1.0 and Cloudflare Cache Purge 2.1.0: they install them and from then on
+  patch release (yooarchive 2.0.1), the new Auto Archive 1.1.0 and Cloudflare Cache Purge 2.1.1: they install them and from then on
   they use the update server of the product repository. Do not add new plugins here.
   PUBLIC repository: never put tokens, passwords or keys in it.
 -->
@@ -13,7 +13,13 @@
         element="cfpurge"
         type="plugin"
         folder="content"
-        version="2.1.0"
+        version="2.1.1"
+        detailsurl="https://raw.githubusercontent.com/WebG-it/cloudflare-cache-purge/main/updates/cfpurge.xml" />
+    <extension
+        name="Cloudflare Cache Purge"
+        element="pkg_cfpurge"
+        type="package"
+        version="2.1.1"
         detailsurl="https://raw.githubusercontent.com/WebG-it/cloudflare-cache-purge/main/updates/cfpurge.xml" />
     <extension
         name="Archive Layouts for YOOtheme"
