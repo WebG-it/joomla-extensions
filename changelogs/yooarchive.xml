@@ -5,6 +5,15 @@
         <element>yooarchive</element>
         <type>plugin</type>
         <folder>system</folder>
+        <version>2.0.1</version>
+        <change>
+            <item>The update server moved to its own repository (https://github.com/WebG-it/archive-layouts): the plugin checks for updates there instead of the shared WebG collection. Nothing else changes: same code, same behaviour, your settings are kept.</item>
+        </change>
+    </changelog>
+    <changelog>
+        <element>yooarchive</element>
+        <type>plugin</type>
+        <folder>system</folder>
         <version>2.0.0</version>
         <addition>
             <item>The options screen explains where the automation went.</item>

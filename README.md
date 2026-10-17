@@ -1,150 +1,47 @@
-# WebG Joomla Extensions
+# WebG Joomla Extensions (catalog)
 
-Joomla extensions by [WebG](https://www.webg.it), free software under the GNU GPL v2 or later,
-with a shared update server: once installed, new versions appear in *System > Update >
-Extensions*.
+Joomla extensions by [WebG](https://www.webg.it), free software under the GNU GPL v2 or later.
+**Each extension now lives in its own repository**, with its own releases, issues, documentation and
+update server. This repository is the catalog and keeps the old shared update address alive for
+sites installed before the split.
 
-| Extension | Type | Version | Docs |
+| Extension | Type | Version | Repository |
 |---|---|---|---|
-| [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) | plugin / system | 2.0.0 | [User guide](./docs/yooarchive/USAGE.md) · [Guida (IT)](./docs/yooarchive/USO.md) |
-| [Auto Archive](#auto-archive) | plugin / system | 1.0.1 | Keeps archived articles in one category of their own, with 301 redirects. Plain Joomla. [User guide](./docs/autoarchive/USAGE.md) · [Guida (IT)](./docs/autoarchive/USO.md) |
-| Cloudflare Cache Purge | plugin / content | 1.1.4 | [Uso (IT)](./docs/USO.md) |
+| Archive Layouts for YOOtheme | plugin / system | 2.0.1 | [WebG-it/archive-layouts](https://github.com/WebG-it/archive-layouts) |
+| Auto Archive | plugin / system | 1.1.0 | [WebG-it/auto-archive](https://github.com/WebG-it/auto-archive) |
+| Cloudflare Cache Purge | package (plugins, module, API) | 2.1.0 | [WebG-it/cloudflare-cache-purge](https://github.com/WebG-it/cloudflare-cache-purge) |
 
-Support: [GitHub issues](https://github.com/WebG-it/joomla-extensions/issues) (write your
-Joomla, PHP and template versions; never post passwords, keys or private data).
+Shared tools for developing and testing them (Docker test sites for Joomla 5 and 6, JED Checker
+helpers, reproducible zip build): [WebG-it/joomla-dev-tools](https://github.com/WebG-it/joomla-dev-tools).
 
----
+Support, bug reports and downloads: in the repository of the extension you use.
 
-## Archive Layouts for YOOtheme
+## Update servers
 
-Design the Joomla **Archived Articles** page with the **YOOtheme Pro builder**, like category
-and featured pages.
-
-![Archive page built with the YOOtheme Pro builder (test data)](./docs/yooarchive/images/frontend-grid.jpg)
-
-**What it does**
-
-- New YOOtheme template type **Archived Articles** for the menu item *Articles > Archived
-  Articles*, assignable by category (with child categories), page number and language.
-- Dynamic content group **Archive**: the archived articles of the page with every article
-  field and **all custom fields**, a single article, and archive information (count, page,
-  filtered month and year, ready-made filter form). Works with the YOOtheme Pagination element.
-- Since 2.0 it does only the layout. The archive automation that was part of 1.x is the separate
-  plugin [Auto Archive](#auto-archive) (see *Updating from 1.x* in the
-  [user guide](./docs/yooarchive/USAGE.md#updating-from-1x)).
-- Survives YOOtheme updates (nothing is written in the template folder). English and Italian.
-
-**Requirements**: Joomla 5 or 6, PHP 8.1+, YOOtheme Pro 5. Tested on Joomla 6.2.0 and 5.4.10,
-PHP 8.4, YOOtheme Pro 5.0.51, together with Essentials for YOOtheme Pro 3.0.15 and 4SEO 7.2.0
-([tested compatibility](./docs/yooarchive/USAGE.md#tested-compatibility)).
-
-**Install**: download `plg_system_yooarchive-2.0.0.zip` from the
-[releases](https://github.com/WebG-it/joomla-extensions/releases) (or [dist/](./dist)), then
-*System > Install > Extensions > Upload Package File*. Full guide: [USAGE.md](./docs/yooarchive/USAGE.md).
-
-**Updates**: automatic through the WebG update server, in *System > Update > Extensions*.
-
-| Builder: dynamic source | Builder: custom fields |
+| Extension | Update server |
 |---|---|
-| ![](./docs/yooarchive/images/builder-source.jpg) | ![](./docs/yooarchive/images/builder-fields.jpg) |
+| Archive Layouts for YOOtheme | `https://raw.githubusercontent.com/WebG-it/archive-layouts/main/updates/yooarchive.xml` |
+| Auto Archive | `https://raw.githubusercontent.com/WebG-it/auto-archive/main/updates/autoarchive.xml` |
+| Cloudflare Cache Purge | `https://raw.githubusercontent.com/WebG-it/cloudflare-cache-purge/main/updates/cfpurge.xml` |
 
-License: GNU GPL v2 or later. YOOtheme Pro is a separate commercial product of YOOtheme GmbH and
-is not included.
+`collection.xml` in this repository lists the same three extensions and points to those update
+servers.
 
----
+## If your site still uses the old address
 
-## Auto Archive
+The versions released before the split (Archive Layouts 2.0.0 and earlier, Auto Archive 1.0.1, Cloudflare
+Cache Purge 1.1.4 and earlier) check `https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml`. That
+address keeps working: it announces Archive Layouts 2.0.1 (a patch that changes only the update address), Auto Archive 1.1.0 and Cloudflare Cache Purge 2.1.0. In *System > Update >
+Extensions* install the update: the patch changes nothing but the update address, and from then on the
+extension checks its own repository. Auto Archive and Cloudflare Cache Purge are not installed on any
+known site: their releases from 1.1.0 and 2.1.0 on already declare their own repository, and the old 1.x versions
+are offered the new ones from this address too.
 
-For the people who run a site the Joomla **Archived** state is invisible, while a category called
-"Sold" or "Past events" can be seen and filled, so editors move articles into a folder or click
-*Archive*, and the two gestures do not match: one leaves the article published, the other leaves
-it in its old category. Auto Archive makes them one and the same, keeps all archived articles
-**in one category of their own** (which is what modules, filters, counters, feeds and sitemaps
-actually look at) and repairs the only side effect of the move, the change of address, with a
-301 redirect. Plain Joomla, with or without YOOtheme. It is not needed to design the archive
-page: [Archive Layouts for YOOtheme](#archive-layouts-for-yootheme) does that, even for several
-archives filtered by category.
+## What stays here
 
-- **Archive** an article (list, toolbar, edit form or API) and it is moved to the category you choose.
-- Save a published article into that category, or move it there with **Batch**, and it is archived
-  through the Joomla article model (Smart Search, cache, versions and action logs stay in sync).
-- Optional **301 redirect** from the old address when the category is part of the article URL.
-- Off by default, permission-aware, never acts for guests or the command line. English and Italian.
-
-**Requirements**: Joomla 5 or 6, PHP 8.1+. Tested on Joomla 6.2.0 and 5.4.10, PHP 8.4, also with
-YOOtheme Pro 5.0.51, Essentials for YOOtheme Pro 3.0.15 and 4SEO 7.2.0 active.
-
-**Install**: download `plg_system_autoarchive-1.0.1.zip` from the
-[releases](https://github.com/WebG-it/joomla-extensions/releases) (or [dist/](./dist)), then
-*System > Install > Extensions > Upload Package File*. Full guide: [USAGE.md](./docs/autoarchive/USAGE.md).
-Coming from Archive Layouts for YOOtheme 1.x: Auto Archive imports the automation settings.
-
-**Updates**: automatic through the WebG update server, in *System > Update > Extensions*.
-
-License: GNU GPL v2 or later.
-
----
-
-## Note interne (IT): come funziona questo repository
-
-
-Update server **a collezione** per i plugin Joomla sviluppati da WebG. Un solo URL,
-condiviso da tutti i plugin: i siti Joomla controllano qui gli aggiornamenti e li
-applicano con un click da **Sistema → Aggiorna**.
-
-> ⚠️ **Repo PUBBLICO.** Qui dentro vanno solo zip GPL e XML di versione.
-> **Mai** token, password, chiavi o altri dati sensibili.
-
-## Struttura
-
-```
-plugins/<pacchetto>/        ← sorgente dei plugin (da yooarchive in poi)
-build/build_plugin.py       ← build riproducibile dello zip (python build/build_plugin.py plugins/<pacchetto>)
-dev/<plugin>/               ← ambiente Docker di collaudo (senza file proprietari di terzi)
-collection.xml              ← update server condiviso (questo URL va nel manifest di OGNI plugin)
-updates/<element>.xml       ← elenco versioni di un singolo plugin
-dist/<pacchetto>-X.Y.Z.zip  ← lo zip installabile
-```
-
-URL del collection server (da mettere in `<updateservers>` di ogni plugin):
-
-```
-https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml
-```
-
-## Plugin pubblicati
-
-| Plugin | element | Tipo | Versione | Documentazione |
-|--------|---------|------|----------|----------------|
-| Cloudflare Cache Purge | `cfpurge` | plugin / content | 1.1.4 | [Uso (umano)](./docs/USO.md) · [Sviluppo (AI/dev)](./docs/DEVELOPING.md) |
-| Archive Layouts for YOOtheme | `yooarchive` | plugin / system | 2.0.0 | [Uso](./docs/yooarchive/USO.md) · [Usage (EN)](./docs/yooarchive/USAGE.md) · [Sviluppo](./docs/yooarchive/DEVELOPING.md) · [Developing (EN)](./docs/yooarchive/DEVELOPING.en.md) |
-| Auto Archive | `autoarchive` | plugin / system | 1.0.1 | [Uso](./docs/autoarchive/USO.md) · [Usage (EN)](./docs/autoarchive/USAGE.md) · [Sviluppo](./docs/autoarchive/DEVELOPING.md) · [Developing (EN)](./docs/autoarchive/DEVELOPING.en.md) |
-
-## Documentazione (due pubblici distinti)
-
-- 👤 **[docs/USO.md](./docs/USO.md)** — per chi **gestisce il sito**: installare, ottenere
-  le credenziali Cloudflare, configurare, aggiornare, **disinstallare**. Tutto da interfaccia
-  Joomla, nessuna compilazione.
-- 🤖 **[docs/DEVELOPING.md](./docs/DEVELOPING.md)** — per **sviluppatore o AI**: architettura,
-  modifica del codice, **compilazione dello zip**, processo di rilascio.
-
-## Aggiungere un plugin nuovo (3 mosse)
-
-1. Aggiungi lo zip in `dist/<pacchetto>-X.Y.Z.zip`.
-2. Crea `updates/<element>.xml` (copia da `updates/cfpurge.xml`, cambia element/folder/version/downloadurl).
-3. Aggiungi **una riga** `<extension>` in `collection.xml`.
-
-Nel manifest del plugin nuovo basta lo stesso blocco:
-
-```xml
-<updateservers>
-    <server type="collection" name="WebG Joomla Extensions">https://raw.githubusercontent.com/WebG-it/joomla-extensions/main/collection.xml</server>
-</updateservers>
-```
-
-## Rilasciare una nuova versione di un plugin esistente
-
-1. Bump `<version>` nel manifest + ribuild zip in `dist/`.
-2. Aggiorna `version` e `downloadurl` in `updates/<element>.xml` (e in `collection.xml`).
-
-I siti vedranno l'update entro il ciclo di controllo di Joomla.
+- `collection.xml`, `updates/*.xml`, `changelogs/*.xml`: the legacy update files described above
+  (changelogs are read by already installed manifests). Frozen: the live copies are in the
+  extension repositories.
+- `dist/`: the zips released from this repository (old download addresses keep working).
+- The full history, including everything that moved: sources, docs and tools are in the commits
+  before the split.
